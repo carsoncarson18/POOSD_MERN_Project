@@ -42,7 +42,7 @@ npm run dev
 This will start:
 
 * React frontend: http://localhost:5173
-* Express backend: http://localhost:5050
+* Express backend: http://localhost:5001
 
 To turn the off when done: 
 

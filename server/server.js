@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 // API Testing: http://localhost:5001/api/endpoint_name
 
 // test route
-app.post("api/test-user", async (req, res) => {
+app.post("/api/test-user", async (req, res) => {
     try {
         const user = new User({
             firstName: "Test",

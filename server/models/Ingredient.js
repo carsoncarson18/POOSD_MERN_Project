@@ -6,21 +6,26 @@ const ingredientSchema = new mongoose.Schema({
         required: true
     },
     quantity: {
-        type: String,
-        required: true
+        value: Number,
+        unit: String
     },
     description: String,
     expiresAt: {
         type: Date,
-        required: true
+        required: true,
+        validate: {
+            validator: function (value) {
+                return value > new Date();
+            },
+            message: "Expiration date must be in the future"
+        }
     },
     claimed: {
         type: Boolean,
         default: false
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    category: {
+        type: String
     },
     claimedBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,9 +35,8 @@ const ingredientSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }
-});
+}, { timestamps: true });
 
-// automatically delete expired ingredients
 ingredientSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("Ingredient", ingredientSchema);

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Ingredient = require("./models/Ingredient"); // Make sure this path is correct
 const User = require("./models/User");
 
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/.env" });
 
 // be sure to add a .env file with MONGODB_URL=YOUR_URL_HERE in the server folder
 const url = process.env.MONGODB_URL;
@@ -33,6 +33,7 @@ app.post("/api/test-user", async (req, res) => {
       firstName: "Test",
       username: "testuser",
       email: "test@gmail.com",
+      password: "test123",
     });
 
     const saved = await user.save();

@@ -123,6 +123,7 @@ app.post("/api/login", async (req, res, next) => {
 
 // serve frontend if built (droplet only)
 const fs = require("fs");
+const path = require("path");
 const clientBuildPath = path.join(__dirname, "../client/dist");
 
 if (fs.existsSync(clientBuildPath)) {

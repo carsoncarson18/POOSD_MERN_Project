@@ -45,7 +45,6 @@ app.post("/api/test-user", async (req, res) => {
 // Signup route - mk
 app.post("/api/signup", async (req, res) => {
   try {
-
     const { firstName, username, password, email } = req.body;
 
     // Ensure all fields are filled in
@@ -56,14 +55,13 @@ app.post("/api/signup", async (req, res) => {
     }
 
     // Duplicate username check
-    const isDup = await User.findOne({username: username});
+    const isDup = await User.findOne({ username: username });
 
     if (isDup) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
       });
-    }
-    else {
+    } else {
       // Save new user to db
       const newUser = new User({
         firstName: firstName,
@@ -97,7 +95,6 @@ app.post("/api/login", async (req, res, next) => {
         error: "Both username and password are required",
       });
     }
-    
 
     // Find user by username
     const user = await User.findOne({ username: username, password: password });

@@ -54,17 +54,28 @@ app.post("/api/signup", async (req, res) => {
         error: "All fields are required!",
       });
     }
-    // Save new user to db
-    const newUser = new User({
-      firstName: firstName,
-      username: username,
-      password: password,
-      email: email,
-    });
-    const saved = await newUser.save();
 
-    // Return user data
-    res.json({ message: "Test user saved!", user: saved }); // success
+    // Duplicate username check
+    const isDup = await User.findOne({username: username});
+
+    if (isDup) {
+      return res.status(401).json({
+        error: "Username already taken; please choose another one",
+      });
+    }
+    else {
+      // Save new user to db
+      const newUser = new User({
+        firstName: firstName,
+        username: username,
+        password: password,
+        email: email,
+      });
+      const saved = await newUser.save();
+
+      // Return user data
+      res.json({ message: "User saved!", user: saved }); // success
+    }
 
     // Catch errors
   } catch (err) {
@@ -86,6 +97,7 @@ app.post("/api/login", async (req, res, next) => {
         error: "Both username and password are required",
       });
     }
+    
 
     // Find user by username
     const user = await User.findOne({ username: username, password: password });

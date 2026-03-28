@@ -50,16 +50,6 @@ To turn the off when done:
 ^C
 ```
 
-### 4. Run Database
-
-Make sure MongoDB is running locally before starting
-
-The backend automatically connects to:
-
-mongodb://localhost:27017/Scraps
-
-The Database Schema can be found in server/models
-
 ## Github
 
 Before starting work:

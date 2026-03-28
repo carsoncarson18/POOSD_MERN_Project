@@ -121,6 +121,18 @@ app.post("/api/login", async (req, res, next) => {
   }
 });
 
+// serve frontend if built (droplet only)
+const fs = require("fs");
+const clientBuildPath = path.join(__dirname, "../client/dist");
+
+if (fs.existsSync(clientBuildPath)) {
+  console.log("Serving frontend from dist...");
+  app.use(express.static(clientBuildPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
+}
+
 // start server
 const PORT = 5001;
 app.listen(PORT, () => {

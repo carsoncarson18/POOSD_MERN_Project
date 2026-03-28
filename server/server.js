@@ -20,10 +20,6 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-app.get("/", (req, res) => {
-  res.send("Server running");
-});
-
 // API Testing: http://localhost:5001/api/endpoint_name
 
 // test route
@@ -129,7 +125,7 @@ const clientBuildPath = path.join(__dirname, "../client/dist");
 if (fs.existsSync(clientBuildPath)) {
   console.log("Serving frontend from dist...");
   app.use(express.static(clientBuildPath));
-  app.get("*", (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.join(clientBuildPath, "index.html"));
   });
 }

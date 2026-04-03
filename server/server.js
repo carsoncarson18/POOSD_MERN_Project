@@ -171,7 +171,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Join neighborhood that already exist
-app.post("/api/join", auth, async (req, res) => {
+app.post("/api/joinHood", auth, async (req, res) => {
   try {
     const { zipCode } = req.body;
     
@@ -205,7 +205,7 @@ app.post("/api/join", auth, async (req, res) => {
 });
 
 // Create neighborhood and name it if your the first to join
-app.post("/api/create", auth, async (req, res) => {
+app.post("/api/createHood", auth, async (req, res) => {
   try {
     const { name, zipCode } = req.body;
 

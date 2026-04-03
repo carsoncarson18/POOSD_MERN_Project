@@ -244,9 +244,8 @@ app.post("/api/createIngredient", auth, async(req, res, next) => {
     }
 
     const newIngredient = await Ingredient.create(formData);
-
     // success
-    res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
+    return res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
 
     // fail; display error
   } catch (err) {
@@ -273,7 +272,7 @@ app.post("/api/editIngredient", auth, async(req, res, next) => {
 
     //if not, exit
     if (!getIngredient) {
-      return res.status(401).json("Unauthorized; Only original poster can edit this ingredient");
+      return res.status(401).json({message: "Unauthorized; Only original poster can edit this ingredient"});
     
     } else { 
       
@@ -281,12 +280,30 @@ app.post("/api/editIngredient", auth, async(req, res, next) => {
       const updateStat = await Ingredient.updateOne({_id: req.body._id}, {$set: updates})
 
       // success
-      res.json({message: "Successfully edited ingredient!", ingredientInfo: updateStat})
+      return res.json({message: "Successfully edited ingredient!", ingredientInfo: updateStat})
     }
 
     // failure
   } catch (err) {
-    res.status(500).json({error: "Failed to edit ingredient", details: err.message})
+    return res.status(500).json({error: "Failed to edit ingredient", details: err.message})
+  }
+})
+
+// Delete by id of ingredient
+app.delete("/api/deleteIngredient", auth, async(req, res, next) => {
+  try {
+    const findIngredient = await Ingredient.findOne({  _id: req.body._id, postedBy: req.user._id })
+    console.log(findIngredient)
+
+    
+    if (!findIngredient) 
+      return res.status(401).json({message: "Ingredient doesn't exist, or you're not authorized to delete it."});
+    
+    const deleteIngredient = await Ingredient.deleteOne({findIngredient})
+    return res.json({message: "Successfully deleted ingredient!", deleteResult: deleteIngredient})
+    
+  } catch (err) {
+    return res.status(500).json({error: "Failed to delete ingredient", details: err.message})
   }
 })
 // Returns all ingredients posted within a neighborhood

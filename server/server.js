@@ -290,11 +290,11 @@ app.post("/api/editIngredient", auth, async(req, res, next) => {
   }
 })
 // Returns all ingredients posted within a neighborhood
-// No parameters
-// For now, it assumes the user has only one neighborhood
-app.get("/api/getAllNeighborhoodIngredients", auth, async(req, res, next) => {
+// Pass in the ID of the neighborhood to get them
+app.get("/api/getAllHoodIngredients", auth, async(req, res, next) => {
   try {
-    const allIngredients = await Ingredient.find(req.user.neighborhood_id);
+
+    const allIngredients = await Ingredient.find({neighborhood: req.body._id});
     res.json({ingredients: allIngredients});
     
   } catch (err) {

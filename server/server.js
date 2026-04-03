@@ -254,27 +254,37 @@ app.post("/api/createIngredient", auth, async(req, res, next) => {
   }
 })
 
-// i assume ur passing in the ingredient info and user stuff
+// Pass in ingredient id and whatever ur editing. Will only update
+// fields that changed (supposedly)
 app.post("/api/editIngredient", auth, async(req, res, next) => {
   try {
 
-    const filter = {_id: req.body._id};
-    console.log(req.body._id)
-    const getIngredient = Ingredient.findOne({ _id: { $eq: req.user._id } });
-    
-    const updateDocument = {
-      $set: {
-        ...req.body,
-      }
+    // only allow the following fields to be updated
+    const updates = { 
+      name: req.body.name,
+      quantity: req.body.quantity,
+      description: req.body.description,
+      expiresAt: req.body.expiresAt,
+      category: req.body.category
     }
+
+    // Ensure ingredient in request was posted by the user
+    const getIngredient = await Ingredient.findOne( {  _id: req.body._id, postedBy: req.user._id });
+
+    //if not, exit
     if (!getIngredient) {
-      res.status(401).json("Unauthorized; Only original poster can edit this ingredient");
+      return res.status(401).json("Unauthorized; Only original poster can edit this ingredient");
     
     } else { 
-      const updateStat = await Ingredient.updateOne(filter, updateDocument)
+      
+      // Update ingredient
+      const updateStat = await Ingredient.updateOne({_id: req.body._id}, {$set: updates})
+
+      // success
       res.json({message: "Successfully edited ingredient!", ingredientInfo: updateStat})
     }
 
+    // failure
   } catch (err) {
     res.status(500).json({error: "Failed to edit ingredient", details: err.message})
   }

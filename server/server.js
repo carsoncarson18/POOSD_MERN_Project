@@ -254,6 +254,31 @@ app.post("/api/createIngredient", auth, async(req, res, next) => {
   }
 })
 
+// i assume ur passing in the ingredient info and user stuff
+app.post("/api/editIngredient", auth, async(req, res, next) => {
+  try {
+
+    const filter = {_id: req.body._id};
+    console.log(req.body._id)
+    const getIngredient = Ingredient.findOne({ _id: { $eq: req.user._id } });
+    
+    const updateDocument = {
+      $set: {
+        ...req.body,
+      }
+    }
+    if (!getIngredient) {
+      res.status(401).json("Unauthorized; Only original poster can edit this ingredient");
+    
+    } else { 
+      const updateStat = await Ingredient.updateOne(filter, updateDocument)
+      res.json({message: "Successfully edited ingredient!", ingredientInfo: updateStat})
+    }
+
+  } catch (err) {
+    res.status(500).json({error: "Failed to edit ingredient", details: err.message})
+  }
+})
 // Returns all ingredients posted within a neighborhood
 // No parameters
 // For now, it assumes the user has only one neighborhood

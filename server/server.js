@@ -1,8 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const Ingredient = require("./models/Ingredient"); // Make sure this path is correct
 const User = require("./models/User");
+const Neighborhood = require("./models/Neighborhood");
 
 require("dotenv").config({ path: __dirname + "/.env" });
 
@@ -21,6 +24,24 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // API Testing: http://localhost:5001/api/endpoint_name
+
+const auth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token missing' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Invalid or expired token' });
+    }
+
+    req.user = decoded;
+    next();
+  });
+};
 
 // test route
 app.post("/api/test-user", async (req, res) => {
@@ -62,17 +83,28 @@ app.post("/api/signup", async (req, res) => {
         error: "Username already taken; please choose another one",
       });
     } else {
+      //hash with salt
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       // Save new user to db
-      const newUser = new User({
+      const newUser = await User.create({
         firstName: firstName,
         username: username,
-        password: password,
+        password: hashedPassword,
         email: email,
       });
-      const saved = await newUser.save();
+
+      const token = jwt.sign(
+        { _id: newUser._id},
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      const retObj = newUser.toObject();
+      delete retObj.password;
 
       // Return user data
-      res.json({ message: "User saved!", user: saved }); // success
+      res.json({ message: "User saved!", token: token, user: retObj }); // success
     }
 
     // Catch errors
@@ -85,7 +117,7 @@ app.post("/api/signup", async (req, res) => {
 });
 
 // Login endpoint
-app.post("/api/login", async (req, res, next) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -97,7 +129,7 @@ app.post("/api/login", async (req, res, next) => {
     }
 
     // Find user by username
-    const user = await User.findOne({ username: username, password: password });
+    const user = await User.findOne({ username: username });
 
     // Check if user exists
     if (!user) {
@@ -105,6 +137,18 @@ app.post("/api/login", async (req, res, next) => {
         error: "Invalid login information; check your spelling",
       });
     }
+
+    const ok = await bcrypt.compare(password, user.password);
+
+    if (!ok) {
+      return res.status(401).json({ error: "Invalid login" });
+    }
+
+    const token = jwt.sign(
+      { _id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     // Return user data
     const userData = {
@@ -115,7 +159,7 @@ app.post("/api/login", async (req, res, next) => {
       email: user.email,
     };
 
-    res.json(userData);
+    res.json({ token: token, user: userData });
 
     // Catch errors
   } catch (err) {
@@ -123,6 +167,64 @@ app.post("/api/login", async (req, res, next) => {
       error: "Failed to login",
       details: err.message,
     });
+  }
+});
+
+// Join neighborhood that already exist
+app.post("/api/join", auth, async (req, res) => {
+  try {
+    const { zipCode } = req.body;
+    
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+      return res.status(400).json({
+        error: "Invalid ZIP code format",
+      });
+    }
+
+    const exists = await Neighborhood.exists({ zipCode });
+
+    if(!exists){
+      return res.json({ status: 'new', message: 'new ZIP code' });
+    }
+
+    await Neighborhood.findByIdAndUpdate(
+      exists,
+      { $addToSet: { members: req.user._id } }
+    );
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { neighborhoods: exists } }
+    )
+
+    res.json({ status: 'joined', message: 'joined ZIP code' });
+
+  } catch (err) {
+    res.status(500).json({ error: "Failed to join Neighborhood", details: err.message });
+  }
+});
+
+// Create neighborhood and name it if your the first to join
+app.post("/api/create", auth, async (req, res) => {
+  try {
+    const { name, zipCode } = req.body;
+
+    const neighborhood = await Neighborhood.create({
+      name: name, 
+      zipCode: zipCode,
+      members: [req.user._id],
+      createdBy: req.user._id  
+    });
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { neighborhoods: neighborhood._id } }
+    )
+
+    res.json(neighborhood);
+   
+  } catch (err) {
+    res.status(500).json({ error: "Failed to make Neighborhood", details: err.message });
   }
 });
 

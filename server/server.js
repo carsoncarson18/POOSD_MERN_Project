@@ -243,15 +243,28 @@ app.post("/api/createIngredient", auth, async(req, res, next) => {
       postedBy: req.user._id
     }
 
-    // success
     const newIngredient = await Ingredient.create(formData);
+
+    // success
     res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
 
     // fail; display error
   } catch (err) {
     res.status(500).json({error: "Failed to create Ingredient", details: err.message})
   }
-  
+})
+
+// Returns all ingredients posted within a neighborhood
+// No parameters
+// For now, it assumes the user has only one neighborhood
+app.get("/api/getAllNeighborhoodIngredients", auth, async(req, res, next) => {
+  try {
+    const allIngredients = await Ingredient.find(req.user.neighborhood_id);
+    res.json({ingredients: allIngredients});
+    
+  } catch (err) {
+    res.status(500).json({error: "Failed to fetch ingredients", details: err.message})
+  }
 })
 
 // serve frontend if built (droplet only)

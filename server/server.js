@@ -76,12 +76,17 @@ app.post("/api/signup", async (req, res) => {
     }
 
     // Duplicate username check
-    const isDup = await User.findOne({ username: username });
-
-    if (isDup) {
+    const isDupUsername = await User.findOne({ username: username });
+    const isDupEmail = await User.findOne({ email: email })
+    if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
       });
+    } 
+    else if (isDupEmail) {
+    return res.status(401).json({
+      error: "Email already taken; please choose another one",
+    });
     } else {
       //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -227,6 +232,27 @@ app.post("/api/create", auth, async (req, res) => {
     res.status(500).json({ error: "Failed to make Neighborhood", details: err.message });
   }
 });
+
+// Create Ingredient; token session required
+app.post("/api/createIngredient", auth, async(req, res, next) => {
+  
+  // Directly pass request body and append postedBy field for creation
+  try {
+    const formData = {
+      ...req.body,
+      postedBy: req.user._id
+    }
+
+    // success
+    const newIngredient = await Ingredient.create(formData);
+    res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
+
+    // fail; display error
+  } catch (err) {
+    res.status(500).json({error: "Failed to create Ingredient", details: err.message})
+  }
+  
+})
 
 // serve frontend if built (droplet only)
 const fs = require("fs");

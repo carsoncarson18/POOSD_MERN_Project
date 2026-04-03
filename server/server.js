@@ -57,7 +57,7 @@ app.post("/api/test-user", async (req, res) => {
     res.json({ message: "Test user saved!", user: saved });
   } catch (err) {
     console.error("Error saving user:", err);
-    res
+    return res
       .status(500)
       .json({ error: "Failed to save user", details: err.message });
   }
@@ -109,7 +109,7 @@ app.post("/api/signup", async (req, res) => {
       delete retObj.password;
 
       // Return user data
-      res.json({ message: "User saved!", token: token, user: retObj }); // success
+      return res.json({ message: "User saved!", token: token, user: retObj }); // success
     }
 
     // Catch errors
@@ -164,11 +164,11 @@ app.post("/api/login", async (req, res) => {
       email: user.email,
     };
 
-    res.json({ token: token, user: userData });
+    return res.json({ token: token, user: userData });
 
     // Catch errors
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to login",
       details: err.message,
     });
@@ -249,7 +249,7 @@ app.post("/api/createIngredient", auth, async(req, res, next) => {
 
     // fail; display error
   } catch (err) {
-    res.status(500).json({error: "Failed to create Ingredient", details: err.message})
+    return res.status(500).json({error: "Failed to create Ingredient", details: err.message})
   }
 })
 
@@ -268,7 +268,7 @@ app.post("/api/editIngredient", auth, async(req, res, next) => {
     }
 
     // Ensure ingredient in request was posted by the user
-    const getIngredient = await Ingredient.findOne( {  _id: req.body._id, postedBy: req.user._id });
+    const getIngredient = await Ingredient.findOne( {  _id: req.body._id, postedBy: req.user._id  });
 
     //if not, exit
     if (!getIngredient) {
@@ -312,10 +312,10 @@ app.get("/api/getAllHoodIngredients", auth, async(req, res, next) => {
   try {
 
     const allIngredients = await Ingredient.find({neighborhood: req.body._id});
-    res.json({ingredients: allIngredients});
+    return res.json({ingredients: allIngredients});
     
   } catch (err) {
-    res.status(500).json({error: "Failed to fetch ingredients", details: err.message})
+    return res.status(500).json({error: "Failed to fetch ingredients", details: err.message})
   }
 })
 

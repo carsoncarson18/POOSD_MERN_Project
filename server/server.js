@@ -305,6 +305,37 @@ app.post("/api/editIngredient", auth, async (req, res, next) => {
   }
 })
 
+app.get("/api/getMyIngredients", auth, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    
+    // First, get the user's ingredient IDs
+    const user = await User.findById(userId).select('ingredients');
+    
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+    
+    // Second, find all ingredients with those IDs
+    const ingredients = await Ingredient.find({
+      _id: { $in: user.ingredients }
+    });
+    
+    return res.status(200).json({
+      count: ingredients.length,
+      data: ingredients
+    });
+    
+  } catch (err) {
+    return res.status(500).json({ 
+      message: "Failed to retrieve user ingredients",
+      details: err.message
+    });
+  }
+});
+
 // Delete by id of ingredient
 app.delete("/api/deleteIngredient", auth, async (req, res, next) => {
   try {

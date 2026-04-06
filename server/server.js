@@ -245,7 +245,21 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
       imageUrl: req.file ? req.file.path : null
     }
 
+    
     const newIngredient = await Ingredient.create(formData);
+    
+    if (!newIngredient) {
+      return res.status(401).json("Failed to create ingredient; ensure all fields are filled")
+    }
+    
+    const addIngToUser = await User.findByIdAndUpdate(req.user._id, {$addToSet: { ingredients: newIngredient._id }})
+    
+    if (!addIngToUser) {
+      return res.status(401).json("Failed to add ingredient to user array");
+    }
+    // success
+    return res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
+
     // success
     return res.json({ message: "Successfully created ingredient!", ingredient: newIngredient });
 

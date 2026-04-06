@@ -89,10 +89,10 @@ app.post("/api/signup", async (req, res) => {
       const result = signupSchema.safeParse(req.body);
       
       if (!result.success) {
-        const prettyError = z.flattenError(result.error)
+        const flatError = z.flattenError(result.error);
         return res.status(400).json({
           message: "Validation failed",
-          errors: prettyError
+          errors: flatError.fieldErrors
         })
       }
 

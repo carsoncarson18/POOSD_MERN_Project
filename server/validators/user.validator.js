@@ -6,7 +6,7 @@ const signupSchema = z.object({
 
     username: z.string().min(5, "Username must be at least 3 characters"),
 
-    email: z.email("Invalid email format").min(1, "Email is required"),
+    email: z.email("Invalid email"),
     password: z.string().min(6, "Password must be 6 characters long")
 });
 

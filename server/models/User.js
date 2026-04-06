@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Neighborhood"
     }],
+    ingredients: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ingredient"
+    }],
     createdAt: {
         type: Date,
         default: Date.now

@@ -7,6 +7,8 @@ const Ingredient = require("./models/Ingredient");
 const User = require("./models/User");
 const Neighborhood = require("./models/Neighborhood");
 const { upload } = require("./config/cloudinary");
+const { signupSchema, loginSchema } = require("./validators/user.validator.js")
+const z = require('zod')
 
 require("dotenv").config({ path: __dirname + "/.env" });
 
@@ -69,16 +71,9 @@ app.post("/api/signup", async (req, res) => {
   try {
     const { firstName, username, password, email } = req.body;
 
-    // Ensure all fields are filled in
-    if (!username || !password || !firstName || !email) {
-      return res.status(400).json({
-        error: "All fields are required!",
-      });
-    }
-
     // Duplicate username check
-    const isDupUsername = await User.findOne({ username: username });
-    const isDupEmail = await User.findOne({ email: email })
+    const isDupUsername = await User.findOne({ username: req.body.username });
+    const isDupEmail = await User.findOne({ email: req.body.email })
     if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
@@ -89,7 +84,19 @@ app.post("/api/signup", async (req, res) => {
         error: "Email already taken; please choose another one",
       });
     } else {
-      //hash with salt
+     
+      // Begin validating the schema using zod
+      const result = signupSchema.safeParse(req.body);
+      
+      if (!result.success) {
+        const prettyError = z.flattenError(result.error)
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: prettyError
+        })
+      }
+
+       //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Save new user to db
@@ -125,13 +132,16 @@ app.post("/api/signup", async (req, res) => {
 // Login endpoint
 app.post("/api/login", async (req, res) => {
   try {
+
     const { username, password } = req.body;
 
-    // Validate input
-    if (!username || !password) {
-      return res.status(400).json({
-        error: "Both username and password are required",
-      });
+    const validateLogin = loginSchema.safeParse(req.body);
+    if (!validateLogin.success) {
+      const prettyError = z.flattenError(validateLogin.error)
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: prettyError
+        })
     }
 
     // Find user by username

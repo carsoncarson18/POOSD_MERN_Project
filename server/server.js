@@ -3,9 +3,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const Ingredient = require("./models/Ingredient"); // Make sure this path is correct
+const Ingredient = require("./models/Ingredient");
 const User = require("./models/User");
 const Neighborhood = require("./models/Neighborhood");
+const { upload } = require("./config/cloudinary");
 
 require("dotenv").config({ path: __dirname + "/.env" });
 
@@ -82,11 +83,11 @@ app.post("/api/signup", async (req, res) => {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
       });
-    } 
+    }
     else if (isDupEmail) {
-    return res.status(401).json({
-      error: "Email already taken; please choose another one",
-    });
+      return res.status(401).json({
+        error: "Email already taken; please choose another one",
+      });
     } else {
       //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -100,7 +101,7 @@ app.post("/api/signup", async (req, res) => {
       });
 
       const token = jwt.sign(
-        { _id: newUser._id},
+        { _id: newUser._id },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -179,7 +180,7 @@ app.post("/api/login", async (req, res) => {
 app.post("/api/joinHood", auth, async (req, res) => {
   try {
     const { zipCode } = req.body;
-    
+
     if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
       return res.status(400).json({
         error: "Invalid ZIP code format",
@@ -188,7 +189,7 @@ app.post("/api/joinHood", auth, async (req, res) => {
 
     const exists = await Neighborhood.exists({ zipCode });
 
-    if(!exists){
+    if (!exists) {
       return res.json({ status: 'new', message: 'new ZIP code' });
     }
 
@@ -215,10 +216,10 @@ app.post("/api/createHood", auth, async (req, res) => {
     const { name, zipCode } = req.body;
 
     const neighborhood = await Neighborhood.create({
-      name: name, 
+      name: name,
       zipCode: zipCode,
       members: [req.user._id],
-      createdBy: req.user._id  
+      createdBy: req.user._id
     });
 
     await User.findByIdAndUpdate(
@@ -227,39 +228,40 @@ app.post("/api/createHood", auth, async (req, res) => {
     )
 
     res.json(neighborhood);
-   
+
   } catch (err) {
     res.status(500).json({ error: "Failed to make Neighborhood", details: err.message });
   }
 });
 
 // Create Ingredient; token session required
-app.post("/api/createIngredient", auth, async(req, res, next) => {
-  
+app.post("/api/createIngredient", auth, upload.single("image"), async (req, res, next) => {
+
   // Directly pass request body and append postedBy field for creation
   try {
     const formData = {
       ...req.body,
-      postedBy: req.user._id
+      postedBy: req.user._id,
+      imageUrl: req.file ? req.file.path : null
     }
 
     const newIngredient = await Ingredient.create(formData);
     // success
-    return res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
+    return res.json({ message: "Successfully created ingredient!", ingredient: newIngredient });
 
     // fail; display error
   } catch (err) {
-    return res.status(500).json({error: "Failed to create Ingredient", details: err.message})
+    return res.status(500).json({ error: "Failed to create Ingredient", details: err.message })
   }
 })
 
 // Pass in ingredient id and whatever ur editing. Will only update
 // fields that changed (supposedly)
-app.post("/api/editIngredient", auth, async(req, res, next) => {
+app.post("/api/editIngredient", auth, async (req, res, next) => {
   try {
 
     // only allow the following fields to be updated
-    const updates = { 
+    const updates = {
       name: req.body.name,
       quantity: req.body.quantity,
       description: req.body.description,
@@ -268,54 +270,54 @@ app.post("/api/editIngredient", auth, async(req, res, next) => {
     }
 
     // Ensure ingredient in request was posted by the user
-    const getIngredient = await Ingredient.findOne( {  _id: req.body._id, postedBy: req.user._id  });
+    const getIngredient = await Ingredient.findOne({ _id: req.body._id, postedBy: req.user._id });
 
     //if not, exit
     if (!getIngredient) {
-      return res.status(401).json({message: "Unauthorized; Only original poster can edit this ingredient"});
-    
-    } else { 
-      
+      return res.status(401).json({ message: "Unauthorized; Only original poster can edit this ingredient" });
+
+    } else {
+
       // Update ingredient
-      const updateStat = await Ingredient.updateOne({_id: req.body._id}, {$set: updates})
+      const updateStat = await Ingredient.updateOne({ _id: req.body._id }, { $set: updates })
 
       // success
-      return res.json({message: "Successfully edited ingredient!", ingredientInfo: updateStat})
+      return res.json({ message: "Successfully edited ingredient!", ingredientInfo: updateStat })
     }
 
     // failure
   } catch (err) {
-    return res.status(500).json({error: "Failed to edit ingredient", details: err.message})
+    return res.status(500).json({ error: "Failed to edit ingredient", details: err.message })
   }
 })
 
 // Delete by id of ingredient
-app.delete("/api/deleteIngredient", auth, async(req, res, next) => {
+app.delete("/api/deleteIngredient", auth, async (req, res, next) => {
   try {
-    const findIngredient = await Ingredient.findOne({  _id: req.body._id, postedBy: req.user._id })
+    const findIngredient = await Ingredient.findOne({ _id: req.body._id, postedBy: req.user._id })
     console.log(findIngredient)
 
-    
-    if (!findIngredient) 
-      return res.status(401).json({message: "Ingredient doesn't exist, or you're not authorized to delete it."});
-    
-    const deleteIngredient = await Ingredient.deleteOne({findIngredient})
-    return res.json({message: "Successfully deleted ingredient!", deleteResult: deleteIngredient})
-    
+
+    if (!findIngredient)
+      return res.status(401).json({ message: "Ingredient doesn't exist, or you're not authorized to delete it." });
+
+    const deleteIngredient = await Ingredient.deleteOne({ findIngredient })
+    return res.json({ message: "Successfully deleted ingredient!", deleteResult: deleteIngredient })
+
   } catch (err) {
-    return res.status(500).json({error: "Failed to delete ingredient", details: err.message})
+    return res.status(500).json({ error: "Failed to delete ingredient", details: err.message })
   }
 })
 // Returns all ingredients posted within a neighborhood
 // Pass in the ID of the neighborhood to get them
-app.get("/api/getAllHoodIngredients", auth, async(req, res, next) => {
+app.get("/api/getAllHoodIngredients", auth, async (req, res, next) => {
   try {
 
-    const allIngredients = await Ingredient.find({neighborhood: req.body._id});
-    return res.json({ingredients: allIngredients});
-    
+    const allIngredients = await Ingredient.find({ neighborhood: req.body._id });
+    return res.json({ ingredients: allIngredients });
+
   } catch (err) {
-    return res.status(500).json({error: "Failed to fetch ingredients", details: err.message})
+    return res.status(500).json({ error: "Failed to fetch ingredients", details: err.message })
   }
 })
 

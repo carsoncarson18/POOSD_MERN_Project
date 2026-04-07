@@ -1,5 +1,4 @@
-import {z } from "zod";
-import { ObjectId } from "mongodb";
+const { z } = require("zod");
 
 const signupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -13,4 +12,10 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required")
 });
 
-export { signupSchema, loginSchema };
+const hoodNameSchema = z.string()
+            .min(3,"Neighborhood name must be at least 3 characters")
+            .max(16,"Neighborhood name must be at most 16 characters")
+            .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Name must start with a letter and only contain letters, numbers, underscores, or hyphens")
+
+
+module.exports = { signupSchema, loginSchema, hoodNameSchema };

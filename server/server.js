@@ -7,7 +7,7 @@ const Ingredient = require("./models/Ingredient");
 const User = require("./models/User");
 const Neighborhood = require("./models/Neighborhood");
 const { upload } = require("./config/cloudinary");
-const { signupSchema, loginSchema } = require("./validators/user.validator.js")
+const { signupSchema, loginSchema, hoodNameSchema } = require("./validators/user.validator.js")
 const z = require('zod')
 
 require("dotenv").config({ path: __dirname + "/.env" });
@@ -224,6 +224,15 @@ app.post("/api/joinHood", auth, async (req, res) => {
 app.post("/api/createHood", auth, async (req, res) => {
   try {
     const { name, zipCode } = req.body;
+
+    const validateHoodName = hoodNameSchema.safeParse(name);
+    if (!validateHoodName.success) {
+      const prettyError = z.flattenError(validateHoodName.error)
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: prettyError
+        })
+    }
 
     const neighborhood = await Neighborhood.create({
       name: name,

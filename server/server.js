@@ -7,6 +7,7 @@ const Ingredient = require("./models/Ingredient");
 const User = require("./models/User");
 const Neighborhood = require("./models/Neighborhood");
 const { upload } = require("./config/cloudinary");
+
 const {
   signupSchema,
   loginSchema, hoodNameSchema,
@@ -19,7 +20,7 @@ const {
   categorySchema } = require('./validators/ingredient.validator')
 
 
-
+const { z } = require('zod');
 require("dotenv").config({ path: __dirname + "/.env" });
 
 // be sure to add a .env file with MONGODB_URL=YOUR_URL_HERE in the server folder
@@ -143,8 +144,6 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   try {
 
-    const { username, password } = req.body;
-
     const validateLogin = loginSchema.safeParse(req.body);
     if (!validateLogin.success) {
       const prettyError = z.flattenError(validateLogin.error)
@@ -153,6 +152,8 @@ app.post("/api/login", async (req, res) => {
           errors: prettyError
         })
     }
+
+    const { username, password } = validateLogin.data;
 
     // Find user by username
     const user = await User.findOne({ username: username });
@@ -178,11 +179,7 @@ app.post("/api/login", async (req, res) => {
 
     // Return user data
     const userData = {
-      id: user._id,
-      firstName: user.firstName,
-      username: user.username,
-      // password: user.password,
-      email: user.email,
+      ...validateLogin,
     };
 
     return res.json({ token: token, user: userData });
@@ -271,7 +268,7 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
 
     // Validate passed in info
     const validateData = validate(req.body)
-    const validateIng = createIngredientSchema.safeParse(validateData);
+    const validateIng = createIngredientClientSchema.safeParse(validateData);
     if (!validateIng.success) {
       const flatError = z.flattenError(validateIng.error);
         return res.status(400).json({
@@ -281,12 +278,11 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
     }
 
     const formData = {
-      ...req.body,
+      ...validateIng.data,
       postedBy: req.user._id,
-      imageUrl: req.file ? req.file.path : null
+      //imageUrl: req.file ? req.file.path : null
     }
 
-    
     const newIngredient = await Ingredient.create(formData);
     
     if (!newIngredient) {
@@ -309,7 +305,6 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
 })
 
 function validate(data) {
- 
     
     const dataToValidate = { ...data };
     

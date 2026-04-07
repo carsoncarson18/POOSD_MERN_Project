@@ -1,4 +1,4 @@
-const { z } = require("zod");
+const { z } = require('zod');
 
 
 // Unit options for quantity
@@ -48,9 +48,15 @@ const createIngredientSchema = z.object({
     .trim(),
 
   // Ensure expiry date is in the future
-  expiresAt: z.date().refine((date) => (date ? date > new Date() : true), {
-    message: "Expiration date must be in the future",
-  }),
+  expiresAt: z
+      .date()
+      .refine(
+        (date) => {
+          if (date === undefined) return true; // optional field
+          return date > new Date();
+        },
+        { message: "Expiration date must be in the future" },
+      ),
 
   neighborhood: z.string(), // just make sure its there, json passes it as a string
 
@@ -97,21 +103,10 @@ const updateIngredientSchema = createIngredientSchema
     neighborhood: true,
   })
   .partial()
-  .extend({
-    expiresAt: z
-      .date()
-      .refine(
-        (date) => {
-          if (date === undefined) return true; // optional field
-          return date > new Date();
-        },
-        { message: "Expiration date must be in the future" },
-      )
-      .optional(),
-  });
+
 
 // Export all schemas
-module.exports = {
+module.exports =  {
   createIngredientSchema,
   createIngredientClientSchema,
   updateIngredientSchema,

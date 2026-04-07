@@ -57,7 +57,6 @@ jobs:
           overwrite: true
 
       # install backend dependencies and restart PM2
-      # trigger
       - name: Install dependencies and restart server
         uses: appleboy/ssh-action@v1.2.0
         with:

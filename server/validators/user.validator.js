@@ -1,5 +1,5 @@
-import {z } from "zod";
-import { ObjectId } from "mongodb";
+const { z } = require("zod")
+
 
 const signupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -13,4 +13,4 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required")
 });
 
-export { signupSchema, loginSchema };
+module.exports = { signupSchema, loginSchema };

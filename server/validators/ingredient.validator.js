@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { ObjectId } from "mongodb";
+const { z } = require("zod");
+
 
 // Unit options for quantity
 const validUnits = z
@@ -111,7 +111,7 @@ const updateIngredientSchema = createIngredientSchema
   });
 
 // Export all schemas
-export {
+module.exports = {
   createIngredientSchema,
   createIngredientClientSchema,
   updateIngredientSchema,

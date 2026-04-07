@@ -18,7 +18,7 @@ const {
   validUnits,
   categorySchema } = require('./validators/ingredient.validator')
 
-const z = require("zod");
+
 
 require("dotenv").config({ path: __dirname + "/.env" });
 

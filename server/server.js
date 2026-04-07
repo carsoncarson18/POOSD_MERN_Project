@@ -80,11 +80,23 @@ app.post("/api/test-user", async (req, res) => {
 // Signup route - mk
 app.post("/api/signup", async (req, res) => {
   try {
-    const { firstName, username, password, email } = req.body;
+  // Begin validating the schema using zod
+    const result = signupSchema.safeParse(req.body);
+    
+    if (!result.success) {
+      const flatError = z.flattenError(result.error);
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: flatError.fieldErrors
+      })
+    }
+
+    const { firstName, username, password, email } = result.data;
 
     // Duplicate username check
-    const isDupUsername = await User.findOne({ username: req.body.username });
-    const isDupEmail = await User.findOne({ email: req.body.email })
+    const isDupUsername = await User.findOne({ username: username});
+    const isDupEmail = await User.findOne({ email: email })
+    
     if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
@@ -95,17 +107,6 @@ app.post("/api/signup", async (req, res) => {
         error: "Email already taken; please choose another one",
       });
     } else {
-     
-      // Begin validating the schema using zod
-      const result = signupSchema.safeParse(req.body);
-      
-      if (!result.success) {
-        const flatError = z.flattenError(result.error);
-        return res.status(400).json({
-          message: "Validation failed",
-          errors: flatError.fieldErrors
-        })
-      }
 
        //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);

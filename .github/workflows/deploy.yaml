@@ -1,0 +1,72 @@
+name: Deploy Scraps
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.18'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      # Install and build frontend
+      - name: Install frontend dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./client
+        run: npm run build
+
+      # Deploy frontend
+      - name: Deploy frontend to server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "client/dist/*"
+          target: "/var/www/POOSD_MERN_Project/client/dist"
+          strip_components: 2
+          rm: true
+
+      # Deploy backend files 
+      - name: Deploy backend files
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "server/*"
+          target: "/var/www/POOSD_MERN_Project/server"
+          overwrite: true
+
+      # install backend dependencies and restart PM2
+      - name: Install dependencies and restart server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /var/www/POOSD_MERN_Project/server
+            npm ci --production
+            pm2 reload mern-backend --update-env || pm2 start server.js --name "mern-backend"
+            pm2 save
+            nginx -s reload

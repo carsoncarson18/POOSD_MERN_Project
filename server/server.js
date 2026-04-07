@@ -9,7 +9,7 @@ const Neighborhood = require("./models/Neighborhood");
 const { upload } = require("./config/cloudinary");
 const {
   signupSchema,
-  loginSchema,
+  loginSchema, hoodNameSchema,
 } = require('./validators/user.validator');
 const {
   createIngredientSchema,
@@ -234,6 +234,15 @@ app.post("/api/joinHood", auth, async (req, res) => {
 app.post("/api/createHood", auth, async (req, res) => {
   try {
     const { name, zipCode } = req.body;
+
+    const validateHoodName = hoodNameSchema.safeParse(name);
+    if (!validateHoodName.success) {
+      const prettyError = z.flattenError(validateHoodName.error)
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: prettyError
+        })
+    }
 
     const neighborhood = await Neighborhood.create({
       name: name,

@@ -34,6 +34,15 @@ const ingredientSchema = new mongoose.Schema({
     postedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
+    },
+    neighborhood: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Neighborhood",
+        required: true
+    },
+    imageUrl: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 

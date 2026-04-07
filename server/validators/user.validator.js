@@ -18,4 +18,4 @@ const hoodNameSchema = z.string()
             .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Name must start with a letter and only contain letters, numbers, underscores, or hyphens")
 
 
-module.module.exports =s = { signupSchema, loginSchema, hoodNameSchema };
+module.exports = { signupSchema, loginSchema, hoodNameSchema };

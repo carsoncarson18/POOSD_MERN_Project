@@ -1,37 +1,45 @@
-const User = require("./models/User");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
+const {
+  signupSchema,
+  loginSchema
+} = require('../validators/user.validator');
+
+const { z } = require('zod')
+
 
 // Signup route - mk
-app.post("/api/signup", async (req, res) => {
+const signup = async (req, res) => {
   try {
-    // Begin validating the schema using zod
+  // Begin validating the schema using zod
+    const result = signupSchema.safeParse(req.body);
     
-    // Begin validating the schema using zod
-      const result = signupSchema.safeParse(req.body);
-      
-      if (!result.success) {
-        const flatError = z.flattenError(result.error);
-        return res.status(400).json({
-          message: "Validation failed",
-          errors: flatError.fieldErrors
-        })
-      }
+    if (!result.success) {
+      const flatError = z.flattenError(result.error);
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: flatError.fieldErrors
+      })
+    }
 
     const { firstName, username, password, email } = result.data;
 
     // Duplicate username check
-    const isDupUsername = await User.findOne({ username: req.body.username });
-    const isDupEmail = await User.findOne({ email: req.body.email })
+    const isDupUsername = await User.findOne({ username: username});
+    const isDupEmail = await User.findOne({ email: email })
+    
     if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
       });
     }
-    if (isDupEmail) {
+    else if (isDupEmail) {
       return res.status(401).json({
         error: "Email already taken; please choose another one",
       });
     } else {
-     
+
        //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -63,10 +71,10 @@ app.post("/api/signup", async (req, res) => {
       .status(500)
       .json({ error: "Failed to save user", details: err.message });
   }
-});
+};
 
 // Login endpoint
-app.post("/api/login", async (req, res) => {
+const login = async (req, res) => {
   try {
 
     const validateLogin = loginSchema.safeParse(req.body);
@@ -116,4 +124,6 @@ app.post("/api/login", async (req, res) => {
       details: err.message,
     });
   }
-});
+}
+
+module.exports = { signup, login };

@@ -7,8 +7,18 @@ const Ingredient = require("./models/Ingredient");
 const User = require("./models/User");
 const Neighborhood = require("./models/Neighborhood");
 const { upload } = require("./config/cloudinary");
-const { signupSchema, loginSchema } = require("./validators/user.validator.js")
-const z = require('zod')
+const {
+  signupSchema,
+  loginSchema,
+} = require('./validators/user.validator');
+const {
+  createIngredientSchema,
+  createIngredientClientSchema,
+  updateIngredientSchema,
+  validUnits,
+  categorySchema } = require('./validators/ingredient.validator')
+
+const z = require("zod");
 
 require("dotenv").config({ path: __dirname + "/.env" });
 
@@ -249,6 +259,18 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
 
   // Directly pass request body and append postedBy field for creation
   try {
+
+    // Validate passed in info
+    const validateData = validate(req.body)
+    const validateIng = createIngredientSchema.safeParse(validateData);
+    if (!validateIng.success) {
+      const flatError = z.flattenError(validateIng.error);
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: flatError.fieldErrors
+        })
+    }
+
     const formData = {
       ...req.body,
       postedBy: req.user._id,
@@ -270,8 +292,6 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
     // success
     return res.json({message: "Successfully created ingredient!", ingredient: newIngredient});
 
-    // success
-    return res.json({ message: "Successfully created ingredient!", ingredient: newIngredient });
 
     // fail; display error
   } catch (err) {
@@ -279,18 +299,51 @@ app.post("/api/createIngredient", auth, upload.single("image"), async (req, res,
   }
 })
 
+function validate(data) {
+ 
+    
+    const dataToValidate = { ...data };
+    
+    // If expiry date exists, convert to date; if conversion failed, throw error
+    if (dataToValidate.expiresAt && typeof dataToValidate.expiresAt === 'string') {
+        dataToValidate.expiresAt = new Date(dataToValidate.expiresAt);
+        
+        // Check if date converted successfully
+        if(isNaN(dataToValidate.expiresAt.getTime())) {
+          throw new Error("Not a valid expiration format");
+        }
+    }
+    
+    // Validate with Zod
+    return dataToValidate;
+}
+
 // Pass in ingredient id and whatever ur editing. Will only update
 // fields that changed (supposedly)
 app.post("/api/editIngredient", auth, async (req, res, next) => {
   try {
+    if (!req.body._id) {
+      return res.status(400).json("Need an ingredient id to update it!");
+    }
+    const validateData = validate(req.body)
+    // Validate errors
+    const validateEditIng = updateIngredientSchema.safeParse(validateData);
+
+    if (!validateEditIng.success) {
+      const flatError = z.flattenError(validateEditIng.error);
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: flatError.fieldErrors
+        })
+    }
+    else {
+      
+      console.log(validateEditIng.data)
+    }
 
     // only allow the following fields to be updated
     const updates = {
-      name: req.body.name,
-      quantity: req.body.quantity,
-      description: req.body.description,
-      expiresAt: req.body.expiresAt,
-      category: req.body.category
+      ...validateEditIng.data
     }
 
     // Ensure ingredient in request was posted by the user

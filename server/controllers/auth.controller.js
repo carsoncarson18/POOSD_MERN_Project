@@ -6,8 +6,10 @@ const {
   loginSchema
 } = require('../validators/user.validator');
 
-const { z } = require('zod')
+const { sendVerificationEmail } = require("../emails/email.service");
+require("dotenv").config({ path: __dirname + "/.env" });
 
+const { z } = require('zod')
 
 // Signup route - mk
 const signup = async (req, res) => {
@@ -42,29 +44,76 @@ const signup = async (req, res) => {
 
        //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Save new user to db
-      const newUser = await User.create({
-        firstName: firstName,
-        username: username,
-        password: hashedPassword,
-        email: email,
-      });
+      
+      // Set up new user for db, but don't add yet
+      const newUser = {
+        firstName,
+        username,
+        hashedPassword,
+        email
+      };
 
       const token = jwt.sign(
-        { _id: newUser._id },
+        { 
+          firstName,
+          username,
+          password: hashedPassword,
+          email
+        },
         process.env.JWT_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "24h" }
       );
 
-      const retObj = newUser.toObject();
-      delete retObj.password;
+      const url = `${process.env.APP_URL}/api/activate/${token}`;
+      const success = sendVerificationEmail(email, url, "Verify your email adress", "Confirm Email");
+
+      if (!success) {
+        return res.status(400).json({message: "Failed to do email verification :("});
+      }
+
+      // const retObj = newUser.toObject();
+      // delete retObj.password;
 
       // Return user data
-      return res.json({ message: "User saved!", token: token, user: retObj }); // success
+      return res.json({ message: "Register success! Please activate your email to finalize your account!"}); // success
     }
 
     // Catch errors
+  } catch (err) {
+    console.error("Error forming user data:", err); // fail
+    res
+      .status(500)
+      .json({ error: "Failed to save user", details: err.message });
+  }
+};
+
+const activateEmail = async (req, res ) => {
+  try {
+    const { token } = req.params;
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    
+    const { firstName, username, password, email } = user;
+    console.log(user);
+    // Check if user already exists (in case they click the link twice)
+    const existingUser = await User.findOne({ email: email });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Account already activated!" });
+    }
+
+    const newUser = await User.create({
+        firstName: firstName,
+        username: username,
+        password: password,
+        email: email,
+    });
+
+
+    if (!newUser) {
+      return res.status(400).json({message: "Failed to create user"});
+    }
+    return res.json({message: "Account has been successfully activated! Please login!", user: newUser})
+
   } catch (err) {
     console.error("Error saving user data:", err); // fail
     res
@@ -126,4 +175,4 @@ const login = async (req, res) => {
   }
 }
 
-module.exports = { signup, login };
+module.exports = { signup, login, activateEmail };

@@ -1,0 +1,22 @@
+.custom-navbar {
+  background-color: #213c1d !important; 
+  font-family: 'Roboto', sans-serif;
+}
+
+.custom-navbar .nav-link {
+  color: #fdf8e8 !important; 
+  font-weight: 500;
+}
+
+.custom-navbar .navbar-brand {
+  color: #fdf8e8 !important;
+  font-weight: bold;
+}
+/* dropdown of navigation */
+.navbar-toggler {
+  border-color: white; 
+}
+
+.navbar-toggler-icon {
+  filter: invert(1); 
+}

@@ -1,7 +1,7 @@
 const Neighborhood = require("../models/Neighborhood");
 const User = require("../models/User");
 const Ingredient = require("../models/Ingredient");
-const { hoodNameSchema } = require('../validators/user.validator');
+const { hoodNameSchema } = require('../validators/neighborhood.validator');
 const { z } = require('zod');
 
 // Join neighborhood that already exist

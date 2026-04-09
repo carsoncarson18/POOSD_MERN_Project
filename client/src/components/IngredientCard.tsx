@@ -3,6 +3,7 @@ import styles from "../styles/listings.module.css";
 type Ingredient = {
   _id: string;
   name: string;
+  description: string;
   quantity: { value: number; unit: string };
   expiresAt: string;
   category: string;
@@ -53,6 +54,9 @@ export default function IngredientCard({
         </p>
         <p>
           <strong>Posted:</strong> {posted}
+        </p>
+        <p>
+          <strong>Description:</strong> {item.description}
         </p>
       </div>
       <div className={styles.listingactions}>

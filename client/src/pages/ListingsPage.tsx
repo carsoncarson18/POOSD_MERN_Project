@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import ListingsHeader from "../components/ListingHeader";
+// import ListingsHeader from "../components/ListingHeader";
 import styles from "../styles/listings.module.css";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
 import IngredientCard from "../components/IngredientCard.tsx";
-import tempImg from "../assets/landing-page/food-waste-bg.png";
+import AddIngredientModal from "../components/AddIngredientModal/AddIngredientModal.tsx";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 type Ingredient = {
   _id: string;
   name: string;
+  description: string;
   quantity: { value: number; unit: string };
   expiresAt: string;
   category: string;
@@ -40,12 +41,17 @@ function ListingsPage() {
   // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
+  console.log("user object", user);
 
   const [listings, setListings] = useState<Ingredient[]>([]);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
+  console.log("first ingredient postedBy:", listings[0]?.postedBy);
+
+  // if there isn't a neighborhood selected, go back to the neighborhoods page
   useEffect(() => {
     if (!neighborhood) {
       navigate("/neighborhoods");
@@ -54,6 +60,7 @@ function ListingsPage() {
     fetchListings();
   }, []);
 
+  // get the list of ingredients within a neighborhood
   async function fetchListings() {
     setLoading(true);
     setError("");
@@ -82,6 +89,7 @@ function ListingsPage() {
     setConfirmIndex(null);
   };
 
+  // deleting an ingredient if the user posted it
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`${API_URL}/api/deleteIngredient`, {
@@ -99,6 +107,10 @@ function ListingsPage() {
     }
   };
 
+  function handleCreated(newIngredient: any) {
+    setListings((prev) => [newIngredient, ...prev]);
+  }
+
   return (
     <div>
       {/* <ListingsHeader /> */}
@@ -108,7 +120,12 @@ function ListingsPage() {
           <a className={styles.returnbutton} href="/neighborhoods">
             ← Neighborhoods
           </a>
-          <button className={styles.addlisting}>+ Add Listing</button>
+          <button
+            className={styles.addlisting}
+            onClick={() => setShowModal(true)}
+          >
+            + Add Listing
+          </button>
         </div>
 
         <div className={styles.listingscontainer}>
@@ -139,6 +156,14 @@ function ListingsPage() {
             ))}
           </div>
         </div>
+        {showModal && (
+          <AddIngredientModal
+            neighborhoodId={neighborhood!._id}
+            token={token}
+            onCreated={handleCreated}
+            onClose={() => setShowModal(false)}
+          />
+        )}
       </main>
       <SiteFooter />
     </div>

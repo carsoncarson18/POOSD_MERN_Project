@@ -1,149 +1,146 @@
 import { useEffect, useState } from "react";
-import { href, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ListingsHeader from "../components/ListingHeader";
 import styles from "../styles/listings.module.css";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
+import IngredientCard from "../components/IngredientCard.tsx";
 import tempImg from "../assets/landing-page/food-waste-bg.png";
 
-// import "../App.css";
-// import Header from "../components/Header";
-type Listing = {
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+type Ingredient = {
+  _id: string;
   name: string;
-  quantity: {
-    value: number;
-    unit: string;
-  };
+  quantity: { value: number; unit: string };
   expiresAt: string;
   category: string;
   imageUrl: string;
   claimed: boolean;
+  postedBy: string;
+  createdAt: string;
+};
+
+type Neighborhood = {
+  _id: string;
+  name: string;
+  zipCode: string;
 };
 
 function ListingsPage() {
-  const [listings, setListings] = useState<Listing[]>([]);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // TEMP testing -  will delete when neighborhoods page is made
+  const neighborhood = location.state?.neighborhood ?? {
+    _id: "69d6ebf15199fe9f257fc531",
+    name: "Zainab-Hood",
+    zipCode: "12345",
+  };
+  // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const [listings, setListings] = useState<Ingredient[]>([]);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    const mockData: Listing[] = [
-      {
-        name: "Apples",
-        quantity: { value: 5, unit: "pcs" },
-        expiresAt: "2026-04-10",
-        category: "Fruit",
-        imageUrl: tempImg,
-        claimed: false,
-      },
-      {
-        name: "Milk",
-        quantity: { value: 1, unit: "liter" },
-        expiresAt: "2026-04-07",
-        category: "Dairy",
-        imageUrl: "",
-        claimed: false,
-      },
-      {
-        name: "chicken",
-        quantity: { value: 1, unit: "liter" },
-        expiresAt: "2026-04-08",
-        category: "Meat",
-        imageUrl: "",
-        claimed: false,
-      },
-      {
-        name: "beef",
-        quantity: { value: 1, unit: "liter" },
-        expiresAt: "2026-04-09",
-        category: "Meat",
-        imageUrl: "",
-        claimed: false,
-      },
-    ];
-    const available = mockData.filter((item) => !item.claimed);
-    setListings(available);
+    if (!neighborhood) {
+      navigate("/neighborhoods");
+      return;
+    }
+    fetchListings();
   }, []);
 
-  const handleClaim = (index: number) => {
-    setConfirmIndex(index);
-  };
+  async function fetchListings() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `${API_URL}/api/getAllHoodIngredients?_id=${neighborhood!._id}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to Load listings");
+      setListings(json.ingredients.filter((i: Ingredient) => !i.claimed));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const handleConfirm = (index: number) => {
+  const handleClaim = (index: number) => setConfirmIndex(index);
+  const handleCancel = () => setConfirmIndex(null);
+
+  const handleConfirm = async (index: number) => {
     const updated = [...listings];
     updated[index].claimed = true;
-    setListings(updated);
+    setListings(updated.filter((i) => !i.claimed));
     setConfirmIndex(null);
   };
 
-  const handleCancel = () => {
-    setConfirmIndex(null);
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/deleteIngredient`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: id }),
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      setListings((prev) => prev.filter((i) => i._id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   return (
     <div>
       {/* <ListingsHeader /> */}
       <SiteHeader />
-
       <main className={styles.listingspage}>
         <div className={styles.actions}>
-          {/* return to neighborhoods page, will link when page is made*/}
-          <a className={styles.returnbutton} href="">
+          <a className={styles.returnbutton} href="/neighborhoods">
             ← Neighborhoods
           </a>
           <button className={styles.addlisting}>+ Add Listing</button>
         </div>
 
         <div className={styles.listingscontainer}>
+          {loading && (
+            <p style={{ color: "white", textAlign: "center" }}>Loading...</p>
+          )}
+          {error && (
+            <p style={{ color: "#ffcccc", textAlign: "center" }}>{error}</p>
+          )}
+          {!loading && !error && listings.length === 0 && (
+            <p style={{ color: "white", textAlign: "center" }}>
+              No scraps posted yet - be the first!
+            </p>
+          )}
           <div className={styles.listingsgrid}>
             {listings.map((item, index) => (
-              <div key={index} className={styles.listingcard}>
-                <img src={item.imageUrl} alt={item.name} />
-                <div className={styles.listingdetails}>
-                  <h2>{item.name}</h2>
-                  <p>
-                    <strong>Quantity:</strong> {item.quantity.value}{" "}
-                    {item.quantity.unit}
-                  </p>
-                  <p>
-                    <strong>Expires:</strong>{" "}
-                    {new Date(item.expiresAt).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <strong>Category:</strong> {item.category}
-                  </p>
-                </div>
-                <div className={styles.listingactions}>
-                  {/* BUTTON SECTION */}
-                  <div className={styles.buttongroup}>
-                    {confirmIndex === index ? (
-                      <>
-                        <button
-                          className={styles.btnconfirm}
-                          onClick={() => handleConfirm(index)}
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          className={styles.btncancel}
-                          onClick={handleCancel}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className={styles.btnclaim}
-                        onClick={() => handleClaim(index)}
-                      >
-                        Claim
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <IngredientCard
+                key={item._id}
+                item={item}
+                index={index}
+                confirmIndex={confirmIndex}
+                currentUserId={user?.id ?? null}
+                onClaim={handleClaim}
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         </div>
       </main>
-      <SiteFooter></SiteFooter>
+      <SiteFooter />
     </div>
   );
 }

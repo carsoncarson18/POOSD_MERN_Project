@@ -76,10 +76,10 @@ const createHood = async (req, res) => {
 const getAllHoodIngredients = async (req, res, next) => {
   try {
 
-    if (!req.body._id) {
+    if (!req.query._id) {
         return res.status(400).json({success: false, message: "Need a neighborhood id for this!!"})
     }
-    const allIngredients = await Ingredient.find({ neighborhood: req.body._id });
+    const allIngredients = await Ingredient.find({ neighborhood: req.query._id });
     return res.json({ ingredients: allIngredients });
 
   } catch (err) {

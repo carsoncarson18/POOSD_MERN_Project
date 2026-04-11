@@ -89,13 +89,9 @@ const getAllHoodIngredients = async (req, res, next) => {
 
 const getAllUserHoods = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("neighborhoods").populate("neighborhoods", "name zipCode")
+    const hoods = await Neighborhood.find({ members: req.user._id })
   
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    return res.json({ neighborhoods: user.neighborhoods });
+    return res.json({ neighborhoods: hoods });
   } catch (err) {
     return res.status(500).json({ error: "Failed to fetch Users Neighborhoods", details: err.message })
   }

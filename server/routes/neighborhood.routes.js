@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { auth } = require("../middleware/auth.middleware");
-const { joinHood, createHood, getAllHoodIngredients, getAllUserHoods } = require("../controllers/neighborhood.controller");
+const { joinHood, createHood, getAllHoodIngredients, getAllUserHoods, deleteUserHood } = require("../controllers/neighborhood.controller");
 
 // Join neighborhood that already exists
 router.post("/joinHood", auth, joinHood);
@@ -14,5 +14,7 @@ router.post("/createHood", auth, createHood);
 router.get("/getAllHoodIngredients", auth, getAllHoodIngredients);
 
 router.get("/getAllUserHoods", auth, getAllUserHoods);
+
+router.delete("/deleteUserHood", auth, deleteUserHood);
 
 module.exports = router;

@@ -98,5 +98,16 @@ const getAllUserHoods = async (req, res) => {
 
 }
 
+const deleteUserHood = async (req, res) => {
+  try {
+    await Neighborhood.updateOne({ _id: req.body._id }, { $pull: { members: req.user._id } })
+    await User.updateOne({ _id: req.user._id }, { $pull: { neighborhoods: req.body._id } })
+  
+    return res.json({ message: "Successfully deleted Neighborhood" });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to delete Users Neighborhood", details: err.message })
+  }
+}
 
-module.exports = { joinHood, createHood, getAllHoodIngredients, getAllUserHoods };
+
+module.exports = { joinHood, createHood, getAllHoodIngredients, getAllUserHoods, deleteUserHood };

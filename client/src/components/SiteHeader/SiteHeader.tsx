@@ -10,10 +10,10 @@ export default function SiteHeader()
             <nav>
                 <ul>
                     <li>
-                        <Link to="">Log In</Link>
+                        <Link to ="/login">Log In</Link>
                     </li>
                     <li>
-                        <Link to="">Sign Up</Link>
+                        <Link to="/signup">Sign Up</Link>
                     </li>
                     <li>
                         <Link to="/about">About Us</Link>

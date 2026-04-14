@@ -1,4 +1,5 @@
 const transporter = require('../config/nodemailer');
+
 require("dotenv").config({ path: __dirname + "/.env" });
 
 
@@ -242,7 +243,67 @@ const sendVerificationEmail = async(email, url, titleTxt, btnTxt) => {
     return await sendEmail(email, subject, html);
 }
 
+// Automated email for when ingredients are claimed
+const sendClaimEmail = async(poster, claimer, ingredient, neighborhood) => {
+    const subject = `Your ingredient "${ingredient.name}" has been claimed!`
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+      <h2 style="color: #4CAF50;">Your Ingredient Has Been Claimed!</h2>
+      
+      <p>Hello <strong>${poster.firstName || 'there'}</strong>!</p>
+      
+      <p>Your Neighbor <strong>${claimer.firstName || 'Someone'}</strong> has claimed the ingredient you posted in the <strong>${neighborhood.name}</strong> neighborhood!</p>
+      
+      <!-- Card with image on the right - responsive -->
+      <div style="background-color: #f5f5f5; border-radius: 10px; padding: 20px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="vertical-align: top; padding-right: 20px;">
+              <h3 style="margin-top: 0; color: #333;">Ingredient Details:</h3>
+              <p><strong>Name:</strong> ${ingredient.name}</p>
+              <p><strong>Quantity:</strong> ${ingredient.quantity?.value || 'N/A'} ${ingredient.quantity?.unit || ''}</p>
+              <p><strong>Description:</strong> ${ingredient.description || 'No description provided'}</p>
+              <p><strong>Category:</strong> ${ingredient.category || 'Other'}</p>
+              <p><strong>Expires:</strong> ${new Date(ingredient.expiresAt).toLocaleDateString()}</p>
+            </td>
+            ${ingredient.imageUrl ? `
+              <td style="vertical-align: top; text-align: center; width: 150px;">
+                <img 
+                  src="${ingredient.imageUrl}" 
+                  alt="${ingredient.name}" 
+                  style="max-width: 150px; max-height: 150px; width: auto; height: auto; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                />
+              </td>
+            ` : ''}
+          </tr>
+        </table>
+      </div>
+      
+      <div style="background-color: #e8f5e9; border-radius: 10px; padding: 15px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #4CAF50;">Claimer Information:</h3>
+        <p><strong>Name:</strong> ${claimer.firstName || 'Unknown'}</p>
+        <p><strong>Email:</strong> ${claimer.email || 'No email provided'}</p>
+        <p><strong>Claimed Date:</strong> ${new Date().toLocaleString()}</p>
+      </div>
+      
+      <div style="background-color: #e1f6e2; border-radius: 10px; padding: 15px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #429644;">Next Steps:</h3>
+        <p>Please reach out to <strong>${claimer.firstName || 'the claimant'}</strong> to arrange pickup or delivery of the ingredient.</p>
+        <p>We recommend coordinating within the next 24 hours!</p>
+      </div>
+      
+      <hr />
+      <p style="color: #666; font-size: 12px;">
+        This is an automated message from Scraps. Please do not reply to this email.<br/>
+        If you have any issues, please contact support, which, in your case, doesn't exist 😉
+      </p>
+    </div>
+    `
+   
+    return await sendEmail(poster.email, subject, html);
+}
 module.exports = {
     sendEmail,
-    sendVerificationEmail
+    sendVerificationEmail,
+    sendClaimEmail
 }

@@ -4,7 +4,7 @@ export default function SiteHeader()
 {
 
     return (
-        <header id="site-header" className={styles.header}>
+        <header className={styles.siteHeader}>
             <h1><a href="">Scraps</a></h1>
             <nav>
                 <ul>

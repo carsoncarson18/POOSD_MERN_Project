@@ -87,5 +87,27 @@ const getAllHoodIngredients = async (req, res, next) => {
   }
 };
 
+const getAllUserHoods = async (req, res) => {
+  try {
+    const hoods = await Neighborhood.find({ members: req.user._id })
+  
+    return res.json({ neighborhoods: hoods });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to fetch Users Neighborhoods", details: err.message })
+  }
 
-module.exports = { joinHood, createHood, getAllHoodIngredients  };
+}
+
+const deleteUserHood = async (req, res) => {
+  try {
+    await Neighborhood.updateOne({ _id: req.body._id }, { $pull: { members: req.user._id } })
+    await User.updateOne({ _id: req.user._id }, { $pull: { neighborhoods: req.body._id } })
+  
+    return res.json({ message: "Successfully deleted Neighborhood" });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to delete Users Neighborhood", details: err.message })
+  }
+}
+
+
+module.exports = { joinHood, createHood, getAllHoodIngredients, getAllUserHoods, deleteUserHood };

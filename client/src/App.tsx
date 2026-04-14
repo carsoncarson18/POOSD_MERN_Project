@@ -1,12 +1,13 @@
-import './App.css'
-import LandingPage from './pages/LandingPage'
-import LoginPage from './pages/LoginPage'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import SignupPage from './pages/SignupPage'
+import "./App.css";
+import LandingPage from "./pages/LandingPage";
+// import "bootstrap/dist/css/bootstrap.min.css";
+import LoginPage from "./pages/LoginPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import SignupPage from "./pages/SignupPage";
 import ActivationPage from './pages/ActivationPage'
+import ListingsPage from "./pages/ListingsPage";
 
 function App() {
-
   return (
     <Router>
       <Routes>
@@ -18,9 +19,10 @@ function App() {
 
         <Route path="/activate/:token" element={<ActivationPage />} />
 
+        <Route path="/listingpage" element={<ListingsPage />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

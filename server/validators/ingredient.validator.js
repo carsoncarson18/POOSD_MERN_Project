@@ -62,7 +62,7 @@ const createIngredientSchema = z.object({
 
   // Ensure positive quantity and valid units
   quantity: z.object({
-    value: z.number().positive("Quantity must be positive"),
+    value: z.coerce.number().positive("Quantity must be positive"),
     unit: validUnits.describe(
       "Please enter a valid unit of measurement, or ' '",
     ),

@@ -1,0 +1,135 @@
+.listingspage {
+    margin-top: 5em;
+    background-color: #718772;
+    padding-top: 1em;
+    min-height: 100vh;
+    /* align-items: center; */
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8em;
+  padding: 0.8em;
+}
+
+/* Neighborhoods button */
+.returnbutton {
+  text-decoration: none;
+  background-color: #ccc;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: black;
+}
+.returnbutton:hover{
+  opacity: 0.7;
+}
+
+/* Add listing button */
+.addlisting {
+  background-color: #ccc;
+  color: black;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.listingscontainer {
+  padding: 2em;
+  width: 90%;
+  /* max-width: 50em; */
+  max-width: 800px;
+  margin: 0 auto;
+  /* justify-content: center; */
+  /* background-color: #e9e1d1; */
+}
+
+.listingsgrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+  color: #174420;
+}
+
+.listingcard {
+  display: flex;
+  /* gap: 1em; */
+  background: #f7f0e5;
+  border: 2px solid #d4c9b7;
+  border-radius: .7em;
+  padding: 1.5em;
+  margin-bottom: 1.5em;
+  align-items: center;
+}
+
+.listingcard img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-right: 2em;
+}
+
+/* DETAILS RIGHT */
+.listingdetails {
+  flex: 1;
+}
+
+.listingdetails h2 {
+  margin: 0 0 8px;
+  text-transform: capitalize;
+}
+
+.listingdetails p {
+  margin: 4px 0;
+  text-transform: capitalize;
+}
+
+.listingactions {
+  margin-left: auto;
+  margin-top: auto;
+  display: flex;
+  gap: 1em;
+}
+
+/* BUTTONS */
+.buttongroup {
+  justify-items: right;
+  margin-top: 1em;
+}
+
+/* Claim button */
+.btnclaim {
+  background-color: #6c9a6c;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Confirm */
+.btnconfirm {
+  background-color: #6bac6d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  margin-right: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Cancel */
+.btncancel {
+  background-color: #b95753;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.7;
+}

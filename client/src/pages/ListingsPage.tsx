@@ -38,11 +38,14 @@ function ListingsPage() {
     name: "Zainab-Hood",
     zipCode: "12345",
   };
+
+  // vvvv switch back to this line vvvv
   // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
   console.log("user object", user);
 
+  // main states
   const [listings, setListings] = useState<Ingredient[]>([]);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,16 @@ function ListingsPage() {
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to Load listings");
-      setListings(json.ingredients.filter((i: Ingredient) => !i.claimed));
+
+      // sort listings by expiration date
+      setListings(
+        json.ingredients
+          .filter((i: Ingredient) => !i.claimed)
+          .sort(
+            (a: Ingredient, b: Ingredient) =>
+              new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime(),
+          ),
+      );
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -107,6 +119,7 @@ function ListingsPage() {
     }
   };
 
+  // add the new ingredient to the list
   function handleCreated(newIngredient: any) {
     setListings((prev) => [newIngredient, ...prev]);
   }
@@ -117,9 +130,11 @@ function ListingsPage() {
       <SiteHeader />
       <main className={styles.listingspage}>
         <div className={styles.actions}>
+          {/* return to neighborhoods page */}
           <a className={styles.returnbutton} href="/neighborhoods">
             ← Neighborhoods
           </a>
+          {/* add a scrap = */}
           <button
             className={styles.addlisting}
             onClick={() => setShowModal(true)}
@@ -128,12 +143,13 @@ function ListingsPage() {
           </button>
         </div>
 
+        {/* list of posted scraps */}
         <div className={styles.listingscontainer}>
           {loading && (
             <p style={{ color: "white", textAlign: "center" }}>Loading...</p>
           )}
           {error && (
-            <p style={{ color: "#ffcccc", textAlign: "center" }}>{error}</p>
+            <p style={{ color: "#6c2c2cff", textAlign: "center" }}>{error}</p>
           )}
           {!loading && !error && listings.length === 0 && (
             <p style={{ color: "white", textAlign: "center" }}>
@@ -156,6 +172,8 @@ function ListingsPage() {
             ))}
           </div>
         </div>
+
+        {/* add ingredient popup if showModal = true */}
         {showModal && (
           <AddIngredientModal
             neighborhoodId={neighborhood!._id}
@@ -169,4 +187,5 @@ function ListingsPage() {
     </div>
   );
 }
+
 export default ListingsPage;

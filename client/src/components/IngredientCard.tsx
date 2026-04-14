@@ -40,6 +40,8 @@ export default function IngredientCard({
   return (
     <div className={styles.listingcard}>
       {item.imageUrl && <img src={item.imageUrl} alt={item.name} />}
+
+      {/* details of the listing */}
       <div className={styles.listingdetails}>
         <h2>{item.name}</h2>
         <p>
@@ -59,8 +61,10 @@ export default function IngredientCard({
           <strong>Description:</strong> {item.description}
         </p>
       </div>
+
       <div className={styles.listingactions}>
         <div className={styles.buttongroup}>
+          {/* if the user is the owner of the listing, the button option is to delete it */}
           {isOwner ? (
             <button
               className={styles.btncancel}

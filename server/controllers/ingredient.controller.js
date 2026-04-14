@@ -1,6 +1,7 @@
 const Ingredient = require("../models/Ingredient");
 const User = require("../models/User");
 const { upload } = require("../config/cloudinary");
+const { uploadToCloudinary } = require("../config/cloudinary");
 
 const {
   createIngredientClientSchema,
@@ -33,6 +34,12 @@ const createIngredient = async (req, res, next) => {
 
   // Directly pass request body and append postedBy field for creation
   try {
+    let imageUrl = null;
+
+    if (req.file) {
+      const  result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+      imageUrl = result.secure_url;
+    }
 
     // Validate passed in info
     const validateData = validate(req.body)
@@ -48,7 +55,7 @@ const createIngredient = async (req, res, next) => {
     const formData = {
       ...validateIng.data,
       postedBy: req.user._id,
-      //imageUrl: req.file ? req.file.path : null
+      imageUrl: imageUrl // req.file ? req.file.path : null
     }
 
     const newIngredient = await Ingredient.create(formData);

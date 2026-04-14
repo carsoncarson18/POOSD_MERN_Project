@@ -78,10 +78,12 @@
 
 .listingdetails h2 {
   margin: 0 0 8px;
+  text-transform: capitalize;
 }
 
 .listingdetails p {
   margin: 4px 0;
+  text-transform: capitalize;
 }
 
 .listingactions {

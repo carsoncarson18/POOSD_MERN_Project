@@ -83,6 +83,9 @@
   border-color: #6c9a6c;
   box-shadow: 0 0 0 3px rgba(108, 154, 108, 0.15);
 }
+.inputCategory {  
+  text-transform: capitalize;
+}
 
 textarea.input {
   resize: vertical;

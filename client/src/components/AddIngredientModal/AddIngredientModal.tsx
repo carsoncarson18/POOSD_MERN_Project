@@ -3,6 +3,7 @@ import styles from "./AddIngredientModal.module.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+// categories allowed for ingredients from validator
 const CATEGORIES = [
   "vegetables",
   "fruits",
@@ -21,6 +22,7 @@ const CATEGORIES = [
   "other",
 ];
 
+// categories allowed for units from validator
 const UNITS = [
   "g",
   "kg",
@@ -36,6 +38,7 @@ const UNITS = [
   "",
 ];
 
+// props passed into component
 type Props = {
   neighborhoodId: string;
   token: string | null;
@@ -52,6 +55,7 @@ type FormState = {
   expiresAt: string;
 };
 
+// default form
 const EMPTY_FORM: FormState = {
   name: "",
   quantity_value: "",
@@ -62,20 +66,22 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
+  // main states
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Min date for expiry the current day
+  // Minimum selectable date for expiration: today
   const today = new Date().toISOString().split("T")[0];
 
+  // handles form inputs
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value })); // dynamically update field
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -92,6 +98,7 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
     setLoading(true);
     try {
       console.log("token being sent: ", token);
+      /*
       const res = await fetch(`${API_URL}/api/createIngredient`, {
         method: "POST",
         headers: {
@@ -110,8 +117,42 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
           },
         }),
       });
+      // */
+
+      // create FormData object
+      const formData = new FormData();
+
+      // text fields for form
+      formData.append("name", form.name);
+      formData.append("description", form.description);
+      formData.append("expiresAt", form.expiresAt);
+      formData.append("category", form.category);
+      formData.append("neighborhood", neighborhoodId);
+
+      // quantity is nested schema -> sent using brackets
+      formData.append("quantity[value]", String(qtyNum));
+      formData.append("quantity[unit]", form.quantity_unit);
+
+      //  if image is uploaded, include it in request
+      if (image) {
+        formData.append("image", image);
+      }
+
+      // send POST request to API
+      const res = await fetch(`${API_URL}/api/createIngredient`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
       console.log("token here??? ", token);
+
+      // Parse JSON response from server
       const json = await res.json();
+
+      // error handling
       if (!res.ok) {
         if (json.errors) {
           const messages = Object.values(json.errors).flat().join(", ");
@@ -119,11 +160,13 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
         }
         throw new Error(json.error || "Failed to create listing");
       }
-
+      // sent to linstings page to update UI w/ new ingredient
       onCreated(json.ingredient);
+
+      // reset form
       setForm(EMPTY_FORM);
       setImage(null);
-      onClose();
+      onClose(); // close modal
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -198,7 +241,7 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
           <label className={styles.label}>
             Category
             <select
-              className={styles.input}
+              className={`${styles.input} ${styles.inputCategory}`}
               name="category"
               value={form.category}
               onChange={handleChange}

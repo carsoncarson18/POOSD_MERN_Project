@@ -64,7 +64,7 @@ const signup = async (req, res) => {
         { expiresIn: "24h" }
       );
 
-      const url = `${process.env.APP_URL}/api/activate/${token}`;
+      const url = `${process.env.FRONTEND_URL}/activate/${token}`;
       const success = sendVerificationEmail(email, url, "Verify your email adress", "Confirm Email");
 
       if (!success) {

@@ -3,79 +3,92 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const {
   signupSchema,
-  loginSchema
-} = require('../validators/user.validator');
+  loginSchema,
+  emailVerifySchema,
+  passwordValidator,
+} = require("../validators/user.validator");
 
-const { sendVerificationEmail } = require("../emails/email.service");
+const {
+  sendVerificationEmail,
+  sendForgotPasswordEmail,
+} = require("../emails/email.service");
 require("dotenv").config({ path: __dirname + "/.env" });
 
-const { z } = require('zod')
+const { z } = require("zod");
 
 // Signup route - mk
 const signup = async (req, res) => {
   try {
-  // Begin validating the schema using zod
+    // Begin validating the schema using zod
     const result = signupSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       const flatError = z.flattenError(result.error);
       return res.status(400).json({
         message: "Validation failed",
-        errors: flatError.fieldErrors
-      })
+        errors: flatError,
+      });
     }
 
     const { firstName, username, password, email } = result.data;
 
     // Duplicate username check
-    const isDupUsername = await User.findOne({ username: username});
-    const isDupEmail = await User.findOne({ email: email })
-    
+    const isDupUsername = await User.findOne({ username: username });
+    const isDupEmail = await User.findOne({ email: email });
+
     if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
       });
-    }
-    else if (isDupEmail) {
+    } else if (isDupEmail) {
       return res.status(401).json({
         error: "Email already taken; please choose another one",
       });
     } else {
-
-       //hash with salt
+      //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       // Set up new user for db, but don't add yet
       const newUser = {
         firstName,
         username,
         hashedPassword,
-        email
+        email,
       };
 
       const token = jwt.sign(
-        { 
+        {
           firstName,
           username,
           password: hashedPassword,
-          email
+          email,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "24h" }
+        { expiresIn: "24h" },
       );
 
       const url = `${process.env.FRONTEND_URL}/activate/${token}`;
-      const success = sendVerificationEmail(email, url, "Verify your email adress", "Confirm Email");
+      const success = sendVerificationEmail(
+        email,
+        url,
+        "Verify your email adress",
+        "Confirm Email",
+      );
 
       if (!success) {
-        return res.status(400).json({message: "Failed to do email verification :("});
+        return res
+          .status(400)
+          .json({ message: "Failed to do email verification :(" });
       }
 
       // const retObj = newUser.toObject();
       // delete retObj.password;
 
       // Return user data
-      return res.json({ message: "Register success! Please activate your email to finalize your account!"}); // success
+      return res.json({
+        message:
+          "Register success! Please activate your email to finalize your account!",
+      }); // success
     }
 
     // Catch errors
@@ -87,11 +100,11 @@ const signup = async (req, res) => {
   }
 };
 
-const activateEmail = async (req, res ) => {
+const activateEmail = async (req, res) => {
   try {
     const { token } = req.params;
     const user = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     const { firstName, username, password, email } = user;
     console.log(user);
     // Check if user already exists (in case they click the link twice)
@@ -102,18 +115,19 @@ const activateEmail = async (req, res ) => {
     }
 
     const newUser = await User.create({
-        firstName: firstName,
-        username: username,
-        password: password,
-        email: email,
+      firstName: firstName,
+      username: username,
+      password: password,
+      email: email,
     });
 
-
     if (!newUser) {
-      return res.status(400).json({message: "Failed to create user"});
+      return res.status(400).json({ message: "Failed to create user" });
     }
-    return res.json({message: "Account has been successfully activated! Please login!", user: newUser})
-
+    return res.json({
+      message: "Account has been successfully activated! Please login!",
+      user: newUser,
+    });
   } catch (err) {
     console.error("Error saving user data:", err); // fail
     res
@@ -125,14 +139,13 @@ const activateEmail = async (req, res ) => {
 // Login endpoint
 const login = async (req, res) => {
   try {
-
     const validateLogin = loginSchema.safeParse(req.body);
     if (!validateLogin.success) {
-      const prettyError = z.flattenError(validateLogin.error)
-        return res.status(400).json({
-          message: "Validation failed",
-          errors: prettyError
-        })
+      const prettyError = z.flattenError(validateLogin.error);
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: prettyError
+      });
     }
 
     const { username, password } = validateLogin.data;
@@ -153,18 +166,11 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid login" });
     }
 
-    const token = jwt.sign(
-      { _id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    // Return user data
-    const userData = {
-      ...validateLogin,
-    };
-
-    return res.json({ token: token, user: userData });
+    return res.json({ token: token, user_id: user._id });
 
     // Catch errors
   } catch (err) {
@@ -173,6 +179,123 @@ const login = async (req, res) => {
       details: err.message,
     });
   }
-}
+};
 
-module.exports = { signup, login, activateEmail };
+// 
+const resetPassword = async (req, res) => {
+  // Need a valid email
+  try {
+    const { email } = req.body;
+    const validateEmail = emailVerifySchema.safeParse(email);
+    
+    if (!validateEmail.success) {
+      const prettyError = z.flattenError(validateEmail);
+        return res.status(400).json({
+          message: "Email validation failed",
+          errors: prettyError,
+        });
+    }
+
+   
+    const isUser = await User.findOne({email: email});
+    console.log(validateEmail.data);
+    
+    if (!isUser) {
+      return res
+        .status(200)
+        .json({
+          message:
+            "If an account exists, you will receive a password reset email",
+        });
+    }
+
+    // make jwt token (expires in one hour)
+    const resetToken = jwt.sign(
+      {
+        userId: isUser._id,
+        purpose: "password-reset",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" },
+    );
+
+    const url = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+    const sendResetLink = await sendForgotPasswordEmail(
+      validateEmail.data,
+      "Forgot Your Password for Scraps?",
+      url,
+      "Password Change Request",
+      "Reset Password"
+    );
+    if (!sendResetLink) {
+      return res.status(400).json({ error: "Failed to send email" });
+    }
+
+    return res.json({
+      message:
+        "Password change request successfully sent! Please check your email to verify!",
+    }); // success
+  } catch (err) {
+  res
+      .status(500)
+      .json({ error: "Failed to complete password reset", details: err.message });
+  }
+};
+
+const activatePassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: "No token passed through" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded.purpose !== 'password-reset') {
+        return res.status(400).json({ error: "Invalid token purpose"});
+      }
+
+      //console.log(password + "\n");
+      const validatePassword = passwordValidator.safeParse(password);
+      console.log(validatePassword.data);
+      if (!validatePassword.success) {
+        const prettyError = z.flattenError(validatePassword.error);
+        return res.status(400).json({
+          message: "Password validation failed",
+          errors: prettyError
+        });
+      }
+
+      // Check if user still exists
+      const user = await User.findById(decoded.userId);
+
+      if (!user) {
+        return res.status(400).json({ error: "User not found"});
+      }
+
+      const hashedPassword = await bcrypt.hash(validatePassword.data, 10);
+
+      user.password = hashedPassword;
+      const saved = await user.save();
+
+      return res.json({
+        message: "Password has successfully been reset!",
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: "Failed to update password in database",
+          details: err.message,
+        });
+    }
+  } catch (err) {
+    console.error("Token error:", err); // fail
+    res
+      .status(500)
+      .json({ error: "Failed to validate session", details: err.message });
+  }
+};
+
+module.exports = { signup, login, activateEmail, resetPassword, activatePassword };

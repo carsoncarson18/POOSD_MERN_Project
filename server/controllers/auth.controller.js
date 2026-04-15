@@ -181,10 +181,11 @@ const login = async (req, res) => {
   }
 };
 
-// 
+// Takes in email and sends email confirming password change request
 const resetPassword = async (req, res) => {
-  // Need a valid email
   try {
+
+    // Validate email
     const { email } = req.body;
     const validateEmail = emailVerifySchema.safeParse(email);
     
@@ -195,11 +196,12 @@ const resetPassword = async (req, res) => {
           errors: prettyError,
         });
     }
-
    
+    // Confirm user is in database
     const isUser = await User.findOne({email: email});
     console.log(validateEmail.data);
     
+    // If not, send vague error to protect privacy
     if (!isUser) {
       return res
         .status(200)
@@ -219,7 +221,10 @@ const resetPassword = async (req, res) => {
       { expiresIn: "1h" },
     );
 
+    // Redirect user to this url in the email
     const url = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+
+    // Send email!
     const sendResetLink = await sendForgotPasswordEmail(
       validateEmail.data,
       "Forgot Your Password for Scraps?",
@@ -227,13 +232,16 @@ const resetPassword = async (req, res) => {
       "Password Change Request",
       "Reset Password"
     );
+
+    // Failure to send email
     if (!sendResetLink) {
       return res.status(400).json({ error: "Failed to send email" });
     }
 
+    // Sucess
     return res.json({
       message:
-        "Password change request successfully sent! Please check your email to verify!",
+        "If an account exists, you will receive a password reset email",
     }); // success
   } catch (err) {
   res
@@ -242,21 +250,26 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Get token from email and pass in new password
 const activatePassword = async (req, res) => {
   try {
     const { token, password } = req.body;
 
+    // Confirm token exists
     if (!token) {
       return res.status(400).json({ error: "No token passed through" });
     }
 
     try {
+      // Grab user id from token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Confirm password reset
       if (decoded.purpose !== 'password-reset') {
         return res.status(400).json({ error: "Invalid token purpose"});
       }
 
-      //console.log(password + "\n");
+      // Ensure new password meets requirements
       const validatePassword = passwordValidator.safeParse(password);
       console.log(validatePassword.data);
       if (!validatePassword.success) {
@@ -274,6 +287,7 @@ const activatePassword = async (req, res) => {
         return res.status(400).json({ error: "User not found"});
       }
 
+      // Hash password and send it off to the database
       const hashedPassword = await bcrypt.hash(validatePassword.data, 10);
 
       user.password = hashedPassword;
@@ -281,17 +295,17 @@ const activatePassword = async (req, res) => {
 
       return res.json({
         message: "Password has successfully been reset!",
-      });
+      }); // success!
     } catch (err) {
       res
         .status(500)
         .json({
           error: "Failed to update password in database",
           details: err.message,
-        });
+        }); // failure (database side)
     }
   } catch (err) {
-    console.error("Token error:", err); // fail
+    console.error("Token error:", err); // failure (token)
     res
       .status(500)
       .json({ error: "Failed to validate session", details: err.message });

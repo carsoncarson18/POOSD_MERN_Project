@@ -9,9 +9,12 @@ router.post("/signup", signup);
 // email activation route
 router.get("/activate/:token", activateEmail)
 
-// password reset
-
+// password reset (sends email and redirects to:
+// `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`)
 router.post("/forgotPassword", resetPassword)
+
+// Updates the password in the database; token and password
+// are passed in req.body
 router.post("/resetPassword", activatePassword)
 
 // Login endpoint

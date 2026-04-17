@@ -2,16 +2,17 @@ const path = require("path");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
-// Create a transporter object using SMTP
 const transporter = nodemailer.createTransport({
-  service: "gmail", 
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  family: 4,
   auth: {
     user: process.env.EMAIL_USER?.trim(),
     pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
   },
 });
 
-// Verify connection configuration
 transporter.verify((error, success) => {
   if (error) {
     console.error("Email configuration error: ", error);

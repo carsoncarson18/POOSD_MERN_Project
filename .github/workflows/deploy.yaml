@@ -8,11 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Checkout repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -22,7 +20,21 @@ jobs:
             package-lock.json
             client/package-lock.json
 
-      # Install and build frontend
+      - name: Create client env file
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > client/.env
+
+      - name: Create server env file
+        run: |
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" > server/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> server/.env
+          echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> server/.env
+          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> server/.env
+          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> server/.env
+          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> server/.env
+          echo "APP_URL=${{ secrets.APP_URL }}" >> server/.env
+          echo "PORT=${{ secrets.PORT }}" >> server/.env
+
       - name: Install frontend dependencies
         working-directory: ./client
         run: npm ci
@@ -31,7 +43,6 @@ jobs:
         working-directory: ./client
         run: npm run build
 
-      # Deploy frontend
       - name: Deploy frontend to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -44,7 +55,6 @@ jobs:
           strip_components: 2
           rm: true
 
-      # Deploy backend files 
       - name: Deploy backend files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -56,7 +66,6 @@ jobs:
           target: "/var/www/POOSD_MERN_Project/server"
           overwrite: true
 
-      # install backend dependencies and restart PM2
       - name: Install dependencies and restart server
         uses: appleboy/ssh-action@v1.2.0
         with:

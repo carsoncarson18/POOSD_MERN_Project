@@ -51,6 +51,7 @@ function ListingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState(false);
 
   console.log("first ingredient postedBy:", listings[0]?.postedBy);
 
@@ -62,6 +63,14 @@ function ListingsPage() {
     }
     fetchListings();
   }, []);
+
+  // display claimmed ingredient message for 4 seconds
+  useEffect(() => {
+    if (claimSuccess) {
+      const timer = setTimeout(() => setClaimSuccess(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [claimSuccess]);
 
   // get the list of ingredients within a neighborhood
   async function fetchListings() {
@@ -95,10 +104,29 @@ function ListingsPage() {
   const handleCancel = () => setConfirmIndex(null);
 
   const handleConfirm = async (index: number) => {
-    const updated = [...listings];
-    updated[index].claimed = true;
-    setListings(updated.filter((i) => !i.claimed));
-    setConfirmIndex(null);
+    try {
+      const item = listings[index];
+      const res = await fetch(`${API_URL}/api/claimIngredient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: item._id }),
+      });
+      if (!res.ok) throw new Error("Failed to claim");
+
+      // remove from listing and display confirmation
+      setListings((prev) => prev.filter((_, i) => i !== index));
+      setConfirmIndex(null);
+      setClaimSuccess(true);
+    } catch (err: any) {
+      alert(err.message);
+    }
+    // const updated = [...listings];
+    // updated[index].claimed = true;
+    // setListings(updated.filter((i) => !i.claimed));
+    // setConfirmIndex(null);
   };
 
   // deleting an ingredient if the user posted it
@@ -145,6 +173,20 @@ function ListingsPage() {
 
         {/* list of posted scraps */}
         <div className={styles.listingscontainer}>
+          {claimSuccess && (
+            <p
+              style={{
+                color: "white",
+                textAlign: "center",
+                background: "#3a6b4a",
+                padding: "1em",
+                borderRadius: "0.8em",
+                marginBottom: "1rem",
+              }}
+            >
+              Item Claimed! The owner has been emailed and will be in touch.
+            </p>
+          )}
           {loading && (
             <p style={{ color: "white", textAlign: "center" }}>Loading...</p>
           )}

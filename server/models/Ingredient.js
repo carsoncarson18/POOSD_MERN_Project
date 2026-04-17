@@ -17,7 +17,7 @@ const ingredientSchema = new mongoose.Schema({
             validator: function (value) {
                 return value > new Date();
             },
-            message: "Expiration date must be in the future"
+            message: "Expiration date must be in future"
         }
     },
     claimed: {

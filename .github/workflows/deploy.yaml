@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           source: "server/*"
-          target: "/var/www/POOSD_MERN_Project/server"
+          target: "/var/www/POOSD_MERN_Project"
           overwrite: true
 
       - name: Install dependencies and restart server

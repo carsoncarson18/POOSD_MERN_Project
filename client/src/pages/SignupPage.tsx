@@ -32,17 +32,23 @@ export default function SignupPage() {
             setSuccess(response.data.message);
         } catch (err: any) {
             let errorMessage = "Signup failed";
-            
+            const data = err.response?.data;
+
             // Extract the first specific validation error if validation fails on the backend
-            if (err.response?.data?.errors) {
-                const fieldErrors = err.response.data.errors;
-                const firstField = Object.keys(fieldErrors)[0];
-                errorMessage = fieldErrors[firstField][0]; 
+            if (data?.errors?.fieldErrors) {
+                const fieldErrors = data.errors.fieldErrors;
+                
+                const keys = Object.keys(fieldErrors);
+                
+                if (keys.length > 0) {
+                    const firstKey = keys[0];
+                    errorMessage = fieldErrors[firstKey][0];
+                }
             } 
-            else {
-                errorMessage = err.response?.data?.error || err.response?.data?.message || errorMessage;
+            else if (data?.error || data?.message) {
+                errorMessage = data.error || data.message;
             }
-            
+
             setError(errorMessage);
         }
     }

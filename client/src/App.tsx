@@ -6,6 +6,15 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignupPage from "./pages/SignupPage";
 import ActivationPage from './pages/ActivationPage'
 import ListingsPage from "./pages/ListingsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import axios from 'axios';
+
+// Check if a user was already logged in
+const savedToken = localStorage.getItem("token");
+if (savedToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+}
 
 function App() {
   return (
@@ -20,6 +29,10 @@ function App() {
         <Route path="/activate/:token" element={<ActivationPage />} />
 
         <Route path="/listingpage" element={<ListingsPage />} />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        <Route path="/resetPassword/:token" element={<ResetPasswordPage />} />
       </Routes>
     </Router>
   );

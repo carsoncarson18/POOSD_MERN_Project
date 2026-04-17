@@ -89,7 +89,7 @@ const signup = async (req, res) => {
         "Confirm Email",
       );
 
-      if (!verificationResult?.messageId) {
+      if (!verificationResult?.statusCode) {
         console.error(
           "Failed to send verification email:",
           verificationResult?.error || "unknown error",
@@ -206,19 +206,19 @@ const resetPassword = async (req, res) => {
     // Validate email
     const { email } = req.body;
     const validateEmail = emailVerifySchema.safeParse(email);
-    
+
     if (!validateEmail.success) {
       const prettyError = z.flattenError(validateEmail);
-        return res.status(400).json({
-          message: "Email validation failed",
-          errors: prettyError,
-        });
+      return res.status(400).json({
+        message: "Email validation failed",
+        errors: prettyError,
+      });
     }
-   
+
     // Confirm user is in database
-    const isUser = await User.findOne({email: email});
+    const isUser = await User.findOne({ email: email });
     console.log(validateEmail.data);
-    
+
     // If not, send vague error to protect privacy
     if (!isUser) {
       return res
@@ -260,7 +260,7 @@ const resetPassword = async (req, res) => {
     );
 
     // Failure to send email
-    if (!sendResetLink?.messageId) {
+    if (!sendResetLink?.statusCode) {
       console.error(
         "Failed to send password reset email:",
         sendResetLink?.error || "unknown error",
@@ -274,7 +274,7 @@ const resetPassword = async (req, res) => {
         "If an account exists, you will receive a password reset email",
     }); // success
   } catch (err) {
-  res
+    res
       .status(500)
       .json({ error: "Failed to complete password reset", details: err.message });
   }
@@ -296,7 +296,7 @@ const activatePassword = async (req, res) => {
 
       // Confirm password reset
       if (decoded.purpose !== 'password-reset') {
-        return res.status(400).json({ error: "Invalid token purpose"});
+        return res.status(400).json({ error: "Invalid token purpose" });
       }
 
       // Ensure new password meets requirements
@@ -314,7 +314,7 @@ const activatePassword = async (req, res) => {
       const user = await User.findById(decoded.userId);
 
       if (!user) {
-        return res.status(400).json({ error: "User not found"});
+        return res.status(400).json({ error: "User not found" });
       }
 
       // Hash password and send it off to the database

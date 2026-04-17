@@ -1,3 +1,4 @@
+const path = require("path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -12,9 +13,14 @@ const {
   sendVerificationEmail,
   sendForgotPasswordEmail,
 } = require("../emails/email.service");
-require("dotenv").config({ path: __dirname + "/.env" });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const { z } = require("zod");
+
+const getAppUrl = () => {
+  const url = process.env.FRONTEND_URL || process.env.APP_URL;
+  return url ? url.replace(/\/+$/, "") : "";
+};
 
 // Signup route - mk
 const signup = async (req, res) => {
@@ -67,17 +73,29 @@ const signup = async (req, res) => {
         { expiresIn: "24h" },
       );
 
-      const url = `${process.env.FRONTEND_URL}/activate/${token}`;
-      const success = sendVerificationEmail(
+      const appUrl = getAppUrl();
+
+      if (!appUrl) {
+        return res.status(500).json({
+          error: "Frontend URL is not configured",
+        });
+      }
+
+      const url = `${appUrl}/activate/${token}`;
+      const verificationResult = await sendVerificationEmail(
         email,
         url,
         "Verify your email adress",
         "Confirm Email",
       );
 
-      if (!success) {
+      if (!verificationResult?.messageId) {
+        console.error(
+          "Failed to send verification email:",
+          verificationResult?.error || "unknown error",
+        );
         return res
-          .status(400)
+          .status(502)
           .json({ message: "Failed to do email verification :(" });
       }
 
@@ -222,7 +240,15 @@ const resetPassword = async (req, res) => {
     );
 
     // Redirect user to this url in the email
-    const url = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+    const appUrl = getAppUrl();
+
+    if (!appUrl) {
+      return res.status(500).json({
+        error: "Frontend URL is not configured",
+      });
+    }
+
+    const url = `${appUrl}/resetPassword/${resetToken}`;
 
     // Send email!
     const sendResetLink = await sendForgotPasswordEmail(
@@ -234,7 +260,11 @@ const resetPassword = async (req, res) => {
     );
 
     // Failure to send email
-    if (!sendResetLink) {
+    if (!sendResetLink?.messageId) {
+      console.error(
+        "Failed to send password reset email:",
+        sendResetLink?.error || "unknown error",
+      );
       return res.status(400).json({ error: "Failed to send email" });
     }
 

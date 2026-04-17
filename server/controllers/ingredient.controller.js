@@ -267,7 +267,7 @@ const claimIngredient = async (req, res, next) => {
     );
 
     // If it failed, alert user
-    if (!sendAutoClaimEmail) {
+    if (!sendAutoClaimEmail?.messageId) {
       return res
         .status(400)
         .json({
@@ -280,7 +280,7 @@ const claimIngredient = async (req, res, next) => {
     return res.json({
       message: "Successfully claimed ingredient!",
       updateIngredient: updateIngredient,
-      emailSent: sendClaimEmail ? true : false,
+      emailSent: !!sendAutoClaimEmail?.messageId,
     });
   } catch (err) {
     return res

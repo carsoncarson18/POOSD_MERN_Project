@@ -1,6 +1,7 @@
-const transporter = require('../config/nodemailer');
+const path = require("path");
+const transporter = require("../config/nodemailer");
 
-require("dotenv").config({ path: __dirname + "/.env" });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 
 const sendEmail = async(to, subject, html, text = "") => {
@@ -17,7 +18,7 @@ const sendEmail = async(to, subject, html, text = "") => {
         return { messageId: info.messageId};
     } catch (err) {
         console.error("Error sending email: ", err);
-        return {error: err.message};
+        return null;
     }
 }
 

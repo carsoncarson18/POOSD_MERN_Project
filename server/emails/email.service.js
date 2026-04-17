@@ -1,28 +1,28 @@
 const path = require("path");
-const transporter = require("../config/nodemailer");
-
+const sgMail = require("@sendgrid/mail");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendEmail = async(to, subject, html, text = "") => {
+const sendEmail = async (to, subject, html, text = "") => {
     try {
-        const mailOptions = {
+        const msg = {
             from: `"Scraps" <${process.env.EMAIL_USER}>`,
             to: to,
             subject: subject,
             html: html
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent: ", info.messageId)
-        return { messageId: info.messageId};
+        const info = await sgMail.send(msg);
+        console.log("Email sent:", info[0].statusCode);
+        return { statusCode: info[0].statusCode };
     } catch (err) {
         console.error("Error sending email: ", err);
         return { error: err.message };
     }
 }
 
-const sendVerificationEmail = async(email, url, titleTxt, btnTxt) => {
+const sendVerificationEmail = async (email, url, titleTxt, btnTxt) => {
     const verifyLink = url;
     const subject = "Verify Email Address for Scraps";
     const html = `<!DOCTYPE html>
@@ -245,7 +245,7 @@ const sendVerificationEmail = async(email, url, titleTxt, btnTxt) => {
 }
 
 // Automated email for when ingredients are claimed
-const sendClaimEmail = async(poster, claimer, ingredient, neighborhood) => {
+const sendClaimEmail = async (poster, claimer, ingredient, neighborhood) => {
     const subject = `Your ingredient "${ingredient.name}" has been claimed!`
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
@@ -300,14 +300,14 @@ const sendClaimEmail = async(poster, claimer, ingredient, neighborhood) => {
       </p>
     </div>
     `
-   
+
     return await sendEmail(poster.email, subject, html);
 }
 
-const sendForgotPasswordEmail = async(victim, subject, url, titleTxt, btnTxt) => {
+const sendForgotPasswordEmail = async (victim, subject, url, titleTxt, btnTxt) => {
     const verifyLink = url;
-    const html = 
-    `<!DOCTYPE html>
+    const html =
+        `<!DOCTYPE html>
                 <html>
                 <head>
                 <meta charset="utf-8">
@@ -525,7 +525,7 @@ const sendForgotPasswordEmail = async(victim, subject, url, titleTxt, btnTxt) =>
     `;
 
     return await sendEmail(victim, subject, html);
-    
+
 }
 module.exports = {
     sendEmail,

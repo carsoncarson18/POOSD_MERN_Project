@@ -11,6 +11,9 @@
     align-items: center;
     gap: 20px;
     
+    p {
+        margin: 0;
+    }
 
     ul {
         list-style: none;
@@ -31,9 +34,9 @@
 
 @media (max-width: 800px) {
     .footer {
-        padding: 15px 0 0 0;
+        padding: 15px 0;
         flex-direction: column-reverse;
-        gap: 0px;
+        gap: 10px;
         ul {
             flex-direction: row;
         }

@@ -83,5 +83,9 @@
             font-size: .9rem;
         }
     }
+
+    nav {
+        padding: 0;
+    }
   }
 }

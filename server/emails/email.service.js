@@ -21,6 +21,9 @@ const sendEmail = async(to, subject, html, text = "") => {
     }
 }
 
+
+
+
 const sendVerificationEmail = async(email, url, titleTxt, btnTxt) => {
     const verifyLink = url;
     const subject = "Verify Email Address for Scraps";

@@ -17,4 +17,8 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required")
 });
 
-module.exports = { signupSchema, loginSchema };
+const passwordValidator = signupSchema.shape.password;
+
+const emailVerifySchema = signupSchema.shape.email;
+
+module.exports = { signupSchema, loginSchema, passwordValidator, emailVerifySchema };

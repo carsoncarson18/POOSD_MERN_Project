@@ -1,22 +1,7 @@
-const nodemailer = require("nodemailer");
-require("dotenv").config({ path: __dirname + "/.env" });
+const path = require("path");
+const sgMail = require("@sendgrid/mail");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
-// Create a transporter object using SMTP
-const transporter = nodemailer.createTransport({
-  service: "gmail", 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Verify connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("Email configuration error: ", error);
-  } else {
-    console.log("Email server is ready to send messages!");
-  }
-});
-
-module.exports = transporter;
+module.exports = sgMail;

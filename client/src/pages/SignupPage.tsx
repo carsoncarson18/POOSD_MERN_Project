@@ -1,8 +1,58 @@
+import { useState } from "react";
+import axios from "axios";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import "../auth.css";
 
 export default function SignupPage() {
+    const [formData, setFormData] = useState({
+        firstName: "",
+        email: "",
+        username: "",
+        password: ""
+    });
+
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    // Update state dynamically based on the input field's "name" attribute
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSignup = async (e: React.SyntheticEvent) => {
+        e.preventDefault();
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Send user registration data to the backend API
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/signup`, formData);
+
+            setSuccess(response.data.message);
+        } catch (err: any) {
+            let errorMessage = "Signup failed";
+            const data = err.response?.data;
+
+            // Extract the first specific validation error if validation fails on the backend
+            if (data?.errors?.fieldErrors) {
+                const fieldErrors = data.errors.fieldErrors;
+                
+                const keys = Object.keys(fieldErrors);
+                
+                if (keys.length > 0) {
+                    const firstKey = keys[0];
+                    errorMessage = fieldErrors[firstKey][0];
+                }
+            } 
+            else if (data?.error || data?.message) {
+                errorMessage = data.error || data.message;
+            }
+
+            setError(errorMessage);
+        }
+    }
+
     return (
         <div className="auth-page-wrapper">
             <SiteHeader />
@@ -11,19 +61,39 @@ export default function SignupPage() {
                 <section className="auth-card">
                     <h1>Sign Up</h1>
                     
-                    <form>
-                        <label className="input-label" htmlFor="tel">First Name</label>
-                        <input className="auth-input" type="text" id="firstname" name="firstname" required />
+                    <form className="auth-form" onSubmit={handleSignup} noValidate>
+                        <div className="input-group">
+                            <label className="input-label" htmlFor="firstName">First Name</label>
+                            <input className="auth-input" type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} />
+                        </div>
 
-                        <label className="input-label" htmlFor="email">Email</label>
-                        <input className="auth-input" type="email" id="email" name="email" required />
+                        <div className="input-group">
+                            <label className="input-label" htmlFor="email">Email</label>
+                            <input className="auth-input" type="email" id="email" name="email" value={formData.email} onChange={handleChange} />
+                        </div>
 
-                        <label className="input-label" htmlFor="username">Username</label>
-                        <input className="auth-input" type="text" id="username" name="username" required />
+                        <div className="input-group">
+                            <label className="input-label" htmlFor="username">Username</label>
+                            <input className="auth-input" type="text" id="username" name="username" value={formData.username} onChange={handleChange} />
+                        </div>
+
+                        <div className="input-group">
+                            <label className="input-label" htmlFor="password">Password</label>
+                            <input className="auth-input" type="password" id="password" name="password" value={formData.password} onChange={handleChange} />
+                        </div>
                         
-                        <label className="input-label" htmlFor="password">Password</label>
-                        <input className="auth-input" type="password" id="password" name="password" required />
-                        
+                        {/* Display feedback messages to the user */}
+                        {error && (
+                            <p className="auth-error">
+                                {error}
+                            </p>
+                        )}
+                        {success && (
+                            <p className="auth-success">
+                                {success}
+                            </p>
+                        )}
+
                         <button className="auth-button" type="submit">Go</button>
                     </form>
                 </section>

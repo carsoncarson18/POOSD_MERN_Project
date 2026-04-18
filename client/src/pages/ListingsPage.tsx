@@ -22,11 +22,13 @@ type Ingredient = {
   createdAt: string;
 };
 
+/*
 type Neighborhood = {
   _id: string;
   name: string;
   zipCode: string;
 };
+*/
 
 function ListingsPage() {
   const location = useLocation();

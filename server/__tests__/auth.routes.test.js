@@ -50,7 +50,7 @@ describe("auth endpoints", () => {
       password: "hashed-password",
       email: "george@example.com",
     });
-    sendVerificationEmail.mockReturnValue(true);
+    sendVerificationEmail.mockResolvedValue({ messageId: "test-message-id" });
   });
 
   test("POST /api/signup returns validation errors for bad input", async () => {
@@ -62,7 +62,7 @@ describe("auth endpoints", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Validation failed");
-    expect(response.body.errors.firstName).toBeDefined();
+    expect(response.body.errors.fieldErrors.firstName).toBeDefined();
   });
 
   test("POST /api/signup rejects duplicate usernames", async () => {
@@ -88,10 +88,20 @@ describe("auth endpoints", () => {
     expect(jwt.sign).toHaveBeenCalled();
     expect(sendVerificationEmail).toHaveBeenCalledWith(
       signupPayload.email,
-      "http://localhost:3000/api/activate/signed-token",
+      "http://localhost:3000/activate/signed-token",
       "Verify your email adress",
       "Confirm Email",
     );
+  });
+
+  test("POST /api/signup surfaces email delivery failures", async () => {
+    User.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    sendVerificationEmail.mockResolvedValue(null);
+
+    const response = await request(app).post("/api/signup").send(signupPayload);
+
+    expect(response.status).toBe(502);
+    expect(response.body.message).toMatch(/Failed to do email verification/i);
   });
 
   test("GET /api/activate/:token creates the user when the token is valid", async () => {
@@ -144,13 +154,7 @@ describe("auth endpoints", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.token).toBe("session-token");
-    expect(response.body.user).toEqual({
-      success: true,
-      data: {
-        username: "george",
-        password: "Password!1",
-      },
-    });
+    expect(response.body.user_id).toBe("user-1");
   });
 
   test("POST /api/login rejects invalid credentials", async () => {

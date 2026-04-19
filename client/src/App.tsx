@@ -8,6 +8,7 @@ import SignupPage from "./pages/SignupPage";
 import ActivationPage from './pages/ActivationPage'
 import ListingsPage from "./pages/ListingsPage";
 import Contact from './pages/contact/Contact';
+import NeighborHoodsPage from './pages/neighborhoods/NeighborhoodsPage';
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/signup" element={<SignupPage />} />
+
+        <Route path="/neighborhoods" element={<NeighborHoodsPage/>} />
 
         <Route path="/activate/:token" element={<ActivationPage />} />
 

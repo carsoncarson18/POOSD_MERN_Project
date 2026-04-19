@@ -31,8 +31,8 @@ const JWT = import.meta.env.VITE_JWT_SECRET
 try 
 { 
     //const response = await axios.post(`${API_URL}/api/signup`,sign_data);    
-    const response = await axios.post(`${API_URL}/api/login`,data);   
-    console.log(response.data.user);
+    // const response = await axios.post(`${API_URL}/api/login`,data);   
+    // console.log(response.data.user);
 
     // const token = localStorage.getItem("token");
     // const user = JSON.parse(localStorage.getItem("user") || "null");

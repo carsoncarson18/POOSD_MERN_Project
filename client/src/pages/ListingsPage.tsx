@@ -56,6 +56,18 @@ function ListingsPage() {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const filteredListings =
+    activeCategory === "all"
+      ? listings
+      : listings.filter((i) => i.category === activeCategory);
+
+  // gets categories that have items
+  const availableCategories = [
+    "all",
+    ...new Set(listings.map((i) => i.category)),
+  ];
 
   // if there isn't a neighborhood selected, go back to the neighborhoods page
   useEffect(() => {
@@ -78,6 +90,8 @@ function ListingsPage() {
   async function fetchListings() {
     setLoading(true);
     setError("");
+    setActiveCategory("all");
+
     try {
       const res = await axios.get(
         `${API_URL}/api/getAllHoodIngredients?_id=${neighborhood!._id}`,
@@ -208,8 +222,23 @@ function ListingsPage() {
               No scraps posted yet - be the first!
             </p>
           )}
+
+          {/* filter options */}
+          <div className={styles.filterbar}>
+            {availableCategories.map((cat) => (
+              <button
+                key={cat}
+                className={`${styles.filterbtn} ${activeCategory === cat ? styles.filterbtnactive : ""}`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* view listings in specific categories */}
           <div className={styles.listingsgrid}>
-            {listings.map((item, index) => (
+            {filteredListings.map((item, index) => (
               <IngredientCard
                 key={item._id}
                 item={item}

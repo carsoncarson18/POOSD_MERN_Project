@@ -195,3 +195,32 @@ button:hover {
     transform: translateX(-50%) translateY(0);
   }
 }
+
+/* filter options */
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.filterbtn {
+  background: #f7f0e5;
+  border: 2px solid #d4c9b7;
+  color: #174420;
+  padding: 0.5em 1em;
+  border-radius: 2em;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.filterbtn:hover {
+  background: #d4c9b7;
+}
+
+.filterbtnactive {
+  background: #3a6b4a;
+  color: white;
+  border-color: #3a6b4a;
+}

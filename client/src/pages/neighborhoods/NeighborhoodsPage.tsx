@@ -6,17 +6,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-const JWT = import.meta.env.VITE_JWT_SECRET
-
 const user = {
     _id:'69e44805f1875a28613fae5c'
 }
 
-  const neighborhood = {
-    _id: "69e44805f1875a28613fae5c",
-    name: "hmm",
-    zipCode: "11111",
-  };
 
 const token = localStorage.getItem("token");
 
@@ -113,10 +106,7 @@ export default function NeighborHoodsPage()
             <SiteHeader/>
                 <main className={styles.neighborhoodsPage}>
                     <h1>My Neighborhoods</h1>
-                    <div style={{height:80}}>
-                        <p>Search for a neighborhood by name or zip code!</p>
-                        <p>Currently searching for neighborhoods</p>
-                    </div>
+                    <p>Enter a zip code to join a neighborhood or create one if it is empty!</p>
                     <SearchBar setNeighborhoods={setNeighborhoods} search={search} setSearch={setSearch}/>
                     <div className={styles.neighborhoodsContainer}>
                         {

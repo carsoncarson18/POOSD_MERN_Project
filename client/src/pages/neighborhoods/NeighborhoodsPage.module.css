@@ -1,5 +1,7 @@
 
 
+
+
 .neighborhoodsPage {
     background-color: #718772;
     min-height: 100vh;
@@ -11,6 +13,40 @@
         margin-bottom: 40px;
         color: white;
     }
+
+    form {
+        background-color: inherit;
+    }
+
+}
+
+
+
+.joinButton {
+    border-radius: 10px;
+    width: fit-content;
+    padding: 5px 20px;
+    height: fit-content;
+    font-size: 1.3rem;
+    display: block;
+    margin: 0 auto 20px;
+    border-radius: 20px;
+    border: 1px solid black;
+    color: black;
+
+    &:hover {
+
+    }
+}
+
+.inactive {
+    background-color: rgb(96, 96, 96);
+
+
+    &:hover {
+        cursor: default;
+        opacity: 1;
+    }
 }
 
 .searchBar {
@@ -21,6 +57,7 @@
     display: block;
     border: 1px solid black;
     padding: 0 15px;
+    text-align: center;
 
     &:focus {
         outline: none;
@@ -32,28 +69,31 @@
     flex-direction: column;
     align-items: center;
     gap: 60px;
+    padding-bottom: 80px;
 }
 
-.neighborhood {
-    width: 80%;
-    min-height: 200px;
+.neighborhood, .createHoodPopup, .leaveHoodPopup  {
+    width: 70%;
+    min-height: 290px;
     background-color: beige;
     border: 2px solid white;
-    border-radius: 25px;
+    border-radius: 15px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.638);
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
+    flex-direction: column;
+    gap: 20px;
     align-items: center;
+    justify-content: center;
     color: var(--main-color);
-    padding: 40px auto;
+    padding: 60px auto;
 
     p {
         font-weight: 500;
         font-size: 1.5rem;
+        margin: 0;
     }
 
-    p:first-child {
+    p:first-of-type {
         font-size: 2.5rem;
     }
 
@@ -65,5 +105,87 @@
         height: fit-content;
         font-size: 1.3rem;
         display: block;
+        margin: 0 auto;
     }
+}
+
+.createHoodPopup {
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px;
+    width: 40%;
+    top:20%;
+    text-align: center;
+
+    p:first-of-type {
+        font-size: 1.5rem;
+    }
+
+    label, p {
+        font-size: 1.2rem;
+    }
+
+    input {
+        width: 35%;
+        height: 50px;
+        border-radius: 10px;
+        text-align: center;
+    }
+}
+
+.leaveHoodPopupContainer {
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--site-header-height);
+    justify-content: center;
+    --blur: 2px;
+    backdrop-filter: blur(var(--blur));
+
+    transition: var(--blur) 1s ease-out;
+}
+
+.leaveHoodPopup {
+    position: absolute;
+    top: 20%;
+    width: 35%;
+    gap: 100px;
+    min-height: 380px;
+    justify-content: start;
+    text-align: center;
+
+    
+    p:not(:first-of-type) {
+        font-size: 1.5rem;
+    }
+
+    p:first-of-type {
+        font-size: 1.2rem;
+    }
+
+    
+
+
+
+    .leaveButton {
+        background-color: #6c2c2cff;
+        color: white;
+        box-shadow: inset 0 -3px 5px rgb(0, 0, 0);
+        margin: auto auto 0;
+        display: block;
+
+        &:hover {
+            background-color: rgb(200, 63, 63);
+            opacity: 1;
+        }
+    }
+}
+
+.errorMessage {
+    color: #6c2c2cff;
 }

@@ -1,23 +1,15 @@
-import { useState, useEffect, type MouseEventHandler, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import SiteFooter from "../../components/SiteFooter/SiteFooter";
 import SiteHeader from "../../components/SiteHeader/SiteHeader";
 import styles from "./NeighborhoodsPage.module.css"
-import { useLocation, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import LeaveNeighborhoodPopup from "./LeaveHoodPopup";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-const test_user = {
-    _id:'69e44805f1875a28613fae5c'
-}
 
 let user = JSON.parse(localStorage.getItem("user") || "null");
-console.log(user);
-
-
-// if (!user) {
-//     user = test_user;
-// }
+// console.log(user);
 
 
 const token = localStorage.getItem("token");
@@ -34,9 +26,6 @@ export interface Hood {
 type onCreate = (name:string,zipCode:string) => void;
 
 
-type onDelete = (id:string) => void;
-
-
 export default function NeighborHoodsPage()
 {
     const navigate = useNavigate();
@@ -51,8 +40,6 @@ export default function NeighborHoodsPage()
 
     async function joinNeighborhood()
     {
-        // console.log("search: ",search);
-        
        try {
             const res = await fetch(`${API_URL}/api/joinHood?_id=${user._id}`, {
                 method:'post',
@@ -122,9 +109,6 @@ export default function NeighborHoodsPage()
     async function deleteNeighborhood(hood:Hood)
     {
         try {        
-            // console.log(id);
-            // console.log(user._id);
-            
             
             const res = await fetch(`${API_URL}/api/deleteUserHood?_id=${user._id}`, {
                 method:'delete',
@@ -262,7 +246,7 @@ export default function NeighborHoodsPage()
                     </div>
                     
                     <form ref={formRef} id="join-hood-form">
-                        <SearchBar setNeighborhoods={setNeighborhoods} search={search} setSearch={setSearch}/>
+                        <SearchBar search={search} setSearch={setSearch}/>
                         <button className={`${styles.joinButton} ${search.length == 5 ? '': styles.inactive}`}>Join!</button>
                     </form>
                     {
@@ -270,7 +254,7 @@ export default function NeighborHoodsPage()
                         <div className={styles.neighborhoodsContainer}>
                                 {
                                     neighborhoods.map((hood,i)=>{
-                                    return <Neighborhood setHoodLeaving={setHoodLeaving} user_id={user._id} hood={hood} onEnter={onEnterHood}  key={i}/>
+                                    return <Neighborhood setHoodLeaving={setHoodLeaving} hood={hood} onEnter={onEnterHood}  key={i}/>
                                 })}
                         </div>
                         :
@@ -286,7 +270,7 @@ export default function NeighborHoodsPage()
 
 
 
-const Neighborhood = ({user_id, hood, onEnter=()=>{}, setHoodLeaving}:{user_id:string, hood:Hood,onEnter:Function,setHoodLeaving:Function}) => {
+const Neighborhood = ({hood, onEnter=()=>{}, setHoodLeaving}:{hood:Hood,onEnter:Function,setHoodLeaving:Function}) => {
 
   
 
@@ -302,7 +286,7 @@ const Neighborhood = ({user_id, hood, onEnter=()=>{}, setHoodLeaving}:{user_id:s
     );
 }
 
-const SearchBar = ({search,setSearch, setNeighborhoods}:{search:string,setSearch:Function,setNeighborhoods:Function})=>{
+const SearchBar = ({search,setSearch}:{search:string,setSearch:Function})=>{
 
 
     return (
@@ -313,7 +297,6 @@ const SearchBar = ({search,setSearch, setNeighborhoods}:{search:string,setSearch
 const CreateNeighborhoodPopup = ({zip, setJoinStatus=()=>{}, onCreate=()=>{}}:{zip:string,setJoinStatus:Function,onCreate:onCreate}) =>
 {
     const [name, setName] = useState<string>();
-    // const [zip, setZip] = useState<string>();
 
     return (
         <div style={{width:'100vw',height:'100vh',position:'absolute',display:'flex',flexDirection:'row',justifyContent:'center',marginTop:'var(--site-header-height)',zIndex:1}}>

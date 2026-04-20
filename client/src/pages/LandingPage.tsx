@@ -1,8 +1,6 @@
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
 import hero_image from "../assets/landing-page/food-waste-bg.png"
-import UserInfoTab from "../components/UserInfoTab/UserInfoTab";
-
 
 export default function LandingPage() {
 
@@ -10,10 +8,7 @@ export default function LandingPage() {
        <>
             
             <div id="landing-page">
-                {/* <UserInfoTab/> */}
-                {/* <div> */}
                 <SiteHeader/> 
-                {/* </div> */}
                 <main style={{padding:'0 0 80px 0'}}>
                     <div style={{padding:'0 0 70px 0',boxShadow:'0 8px 22px -15px black ',width:'100%',height:'fit-content', position:'relative', zIndex:0, overflow:'hidden'}}>
                         <img style={{width:'100%',height:'100%',opacity:.6,objectFit:'cover',position:'absolute',bottom:0}} alt="Bag of Food Scraps" src={hero_image}/>

@@ -43,11 +43,11 @@ const signup = async (req, res) => {
     const isDupEmail = await User.findOne({ email: email });
 
     if (isDupEmail) {
-        if (!isDupEmail.isVerified) {
-          return res.status(401).json({
+      if (!isDupEmail.isVerified) {
+        return res.status(401).json({
           error: "Verification email already sent; please check your inbox",
         });
-        } else {
+      } else {
         return res.status(401).json({
           error: "Email already taken; please choose another one",
         });
@@ -128,7 +128,7 @@ const activateEmail = async (req, res) => {
     const { firstName, username, password, email } = user;
     console.log(user);
 
-    const newUser = await User.findByIdAndUpdate({isVerified: true});
+    const newUser = await User.findByIdAndUpdate({ isVerified: true });
 
     if (!newUser) {
       return res.status(400).json({ message: "Failed to create user" });
@@ -153,7 +153,7 @@ const login = async (req, res) => {
       const prettyError = z.flattenError(validateLogin.error);
       return res.status(400).json({
         message: "Validation failed",
-        errors: prettyError
+        errors: prettyError,
       });
     }
 
@@ -180,7 +180,7 @@ const login = async (req, res) => {
 
       const token = jwt.sign(
         {
-          userId: user._id
+          userId: user._id,
         },
         process.env.JWT_SECRET,
         { expiresIn: "24h" },
@@ -195,7 +195,8 @@ const login = async (req, res) => {
       );
 
       return res.status(200).json({
-        details: "Verify your email to complete your registration; resent verification email!",
+        details:
+          "Verify your email to complete your registration; resent verification email!",
       });
     }
 
@@ -223,7 +224,6 @@ const login = async (req, res) => {
 // Takes in email and sends email confirming password change request
 const resetPassword = async (req, res) => {
   try {
-
     // Validate email
     const { email } = req.body;
     const validateEmail = emailVerifySchema.safeParse(email);
@@ -242,12 +242,10 @@ const resetPassword = async (req, res) => {
 
     // If not, send vague error to protect privacy
     if (!isUser) {
-      return res
-        .status(200)
-        .json({
-          message:
-            "If an account exists, you will receive a password reset email",
-        });
+      return res.status(200).json({
+        message:
+          "If an account exists, you will receive a password reset email",
+      });
     }
 
     // make jwt token (expires in one hour)
@@ -277,7 +275,7 @@ const resetPassword = async (req, res) => {
       "Forgot Your Password for Scraps?",
       url,
       "Password Change Request",
-      "Reset Password"
+      "Reset Password",
     );
 
     // Failure to send email
@@ -291,13 +289,15 @@ const resetPassword = async (req, res) => {
 
     // Sucess
     return res.json({
-      message:
-        "If an account exists, you will receive a password reset email",
+      message: "If an account exists, you will receive a password reset email",
     }); // success
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to complete password reset", details: err.message });
+      .json({
+        error: "Failed to complete password reset",
+        details: err.message,
+      });
   }
 };
 
@@ -316,7 +316,7 @@ const activatePassword = async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Confirm password reset
-      if (decoded.purpose !== 'password-reset') {
+      if (decoded.purpose !== "password-reset") {
         return res.status(400).json({ error: "Invalid token purpose" });
       }
 
@@ -328,7 +328,7 @@ const activatePassword = async (req, res) => {
         const prettyError = z.flattenError(validatePassword.error);
         return res.status(400).json({
           message: "Password validation failed",
-          errors: prettyError
+          errors: prettyError,
         });
       }
 
@@ -349,12 +349,10 @@ const activatePassword = async (req, res) => {
         message: "Password has successfully been reset!",
       }); // success!
     } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: "Failed to update password in database",
-          details: err.message,
-        }); // failure (database side)
+      res.status(500).json({
+        error: "Failed to update password in database",
+        details: err.message,
+      }); // failure (database side)
     }
   } catch (err) {
     console.error("Token error:", err); // failure (token)
@@ -364,4 +362,10 @@ const activatePassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, activateEmail, resetPassword, activatePassword };
+module.exports = {
+  signup,
+  login,
+  activateEmail,
+  resetPassword,
+  activatePassword,
+};

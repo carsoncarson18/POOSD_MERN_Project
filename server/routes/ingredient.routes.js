@@ -2,16 +2,21 @@ const express = require("express");
 const router = express.Router();
 const { auth } = require("../middleware/auth.middleware");
 const { upload } = require("../config/cloudinary");
-const { 
-  createIngredient, 
-  editIngredient, 
-  getMyIngredients, 
+const {
+  createIngredient,
+  editIngredient,
+  getMyIngredients,
   claimIngredient,
   deleteIngredient,
 } = require("../controllers/ingredient.controller");
 
 // Create Ingredient; token session required
-router.post("/createIngredient", auth, upload.single("image"), createIngredient);
+router.post(
+  "/createIngredient",
+  auth,
+  upload.single("image"),
+  createIngredient,
+);
 
 // Pass in ingredient id and whatever ur editing. Will only update
 // fields that changed (supposedly)

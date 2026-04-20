@@ -2,25 +2,18 @@ const { z } = require('zod');
 
 
 // Unit options for quantity
+const validUnitsOptions = ["g", "kg", "ml", "L", "cup", "tbsp", "tsp", "piece", "lb", "count", "oz", " "];
 const validUnits = z
-  .enum([
-    "g",
-    "kg",
-    "ml",
-    "L",
-    "cup",
-    "tbsp",
-    "tsp",
-    "piece",
-    "lb",
-    "count",
-    "oz",
-    " ",
-  ])
-  .optional();
+  .string()
+  .refine(
+  (val) => val === undefined || validUnitsOptions.includes(val),
+  {
+    message: `Invalid unit: must be within [${validUnitsOptions.join(", ")}]`,
+  })
+
 
 // Category options
-const categorySchema = z.enum([
+const validCategory = [
   "vegetables",
   "fruits",
   "dairy",
@@ -36,7 +29,15 @@ const categorySchema = z.enum([
   "spreads",
   "snacks",
   "other",
-]);
+]
+
+const categorySchema = z.string()
+  .refine(
+    (val) => validCategory.includes(val),
+    {
+      message: `Invalid category: must be within [${validCategory.join(", ")}]`,
+    }
+  );
 
 // Create ingredient reqs
 const createIngredientSchema = z.object({
@@ -58,14 +59,15 @@ const createIngredientSchema = z.object({
         { message: "Expiration date must be in the future" },
       ),
 
-  neighborhood: z.string(), // just make sure its there, json passes it as a string
+  neighborhood: z.string("Neighborhood ID must be passed"),
 
   // Ensure positive quantity and valid units
   quantity: z.object({
     value: z.coerce.number().positive("Quantity must be positive"),
-    unit: validUnits.describe(
-      "Please enter a valid unit of measurement, or ' '",
-    ),
+    unit: validUnits
+  })
+  .refine((val) => val !== undefined, {
+    message: "Quantity is required. Please provide an object with 'value' and 'unit' fields"
   }),
 
   // Description has a 400 char limit

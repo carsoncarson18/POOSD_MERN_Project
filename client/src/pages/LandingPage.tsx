@@ -4,8 +4,7 @@ import hero_image from "../assets/landing-page/food-waste-bg.png"
 import UserInfoTab from "../components/UserInfoTab/UserInfoTab";
 
 
-export default function LandingPage()
-{
+export default function LandingPage() {
 
     return (
        <>

@@ -134,7 +134,12 @@ function ListingsPage() {
   const handleConfirm = async (index: number) => {
     try {
       const item = listings[index];
-      await axios.post(`${API_URL}/api/claimIngredient`, { _id: item._id });
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_URL}/api/claimIngredient`,
+        { _id: item._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       /* // replaced with axios
       const res = await fetch(`${API_URL}/api/claimIngredient`, {
@@ -160,8 +165,10 @@ function ListingsPage() {
   // deleting an ingredient if the user posted it
   const handleDelete = async (id: string) => {
     try {
+      const token = localStorage.getItem("token");
       await axios.delete(`${API_URL}/api/deleteIngredient`, {
         data: { _id: id },
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       /* replaced with axios

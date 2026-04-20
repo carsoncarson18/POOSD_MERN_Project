@@ -11,6 +11,8 @@ const ingredientRoutes = require("./routes/ingredient.routes");
 const url = process.env.MONGODB_URL;
 const app = express();
 
+console.log(process.env.FRONTEND_URL);
+
 // middleware
 app.use(cors());
 app.use(express.json());

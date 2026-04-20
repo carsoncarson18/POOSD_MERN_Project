@@ -47,7 +47,8 @@ function ListingsPage() {
 
   // const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
-  console.log("user object", user);
+  // console.log("user object", user);
+
 
   // main states
   const [listings, setListings] = useState<Ingredient[]>([]);

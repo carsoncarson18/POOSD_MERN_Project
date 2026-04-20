@@ -1,11 +1,11 @@
+import { Link } from "react-router-dom";
 import styles from "./SiteHeader.module.css"
-import { Link } from "react-router-dom"
 
 export default function SiteHeader()
 {
 
     return (
-        <header id="site-header" className={styles.header}>
+        <header className={styles.siteHeader}>
             <h1><Link to="/">Scraps</Link></h1>
             <nav>
                 <ul>
@@ -16,7 +16,7 @@ export default function SiteHeader()
                         <Link to="/signup">Sign Up</Link>
                     </li>
                     <li>
-                        <a href="">About Us</a>
+                        <Link to="/about">About Us</Link>
                     </li>
                 </ul>
             </nav>

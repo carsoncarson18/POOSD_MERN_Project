@@ -200,7 +200,7 @@ const deleteIngredient = async (req, res, next) => {
             "Ingredient doesn't exist, or you're not authorized to delete it.",
         });
 
-    const deleteIngredient = await Ingredient.deleteOne({ findIngredient });
+    const deleteIngredient = await Ingredient.deleteOne({ _id: req.body._id });
     return res.json({
       message: "Successfully deleted ingredient!",
       deleteResult: deleteIngredient,
@@ -259,12 +259,18 @@ const claimIngredient = async (req, res, next) => {
       .populate("claimedBy", "firstName email")
 
     // Send the claim email to the original poster
+    console.log("postedBy:", getIngredient.postedBy);
+    console.log("claimedBy:", updateIngredient.claimedBy);
+    console.log("neighborhood:", getIngredient.neighborhood);
+
     const sendAutoClaimEmail = await sendClaimEmail(
       getIngredient.postedBy,
       updateIngredient.claimedBy,
       getIngredient,
       getIngredient.neighborhood,
     );
+
+    console.log("claim email result:", sendAutoClaimEmail);
 
     // If it failed, alert user
     if (!sendAutoClaimEmail?.statusCode) {

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import SiteFooter from "../../components/SiteFooter/SiteFooter";
 import SiteHeader from "../../components/SiteHeader/SiteHeader";
-import { useState, type MouseEventHandler } from "react";
+import { useState} from "react";
 import er_diagram from "../../assets/about-page/erdiagram.png"
 import figma_design from "../../assets/about-page/figma-design.png"
 import male_icon from "../../assets/about-page/male-silhouette-icon.png" 

@@ -61,12 +61,17 @@ function ListingsPage() {
 
   const filteredListings =
     activeCategory === "all"
-      ? listings
-      : listings.filter((i) => i.category === activeCategory);
+      ? listings.filter((i) => i.postedBy !== user?.id) // only show items not posted by user
+      : activeCategory === "your items"
+        ? listings.filter((i) => i.postedBy === user?.id) // only show items the user posted
+        : listings.filter(
+            (i) => i.category === activeCategory && i.postedBy !== user?.id, // items in a specific category
+          );
 
   // gets categories that have items
   const availableCategories = [
     "all",
+    "your items",
     ...new Set(listings.map((i) => i.category)),
   ];
 
@@ -200,23 +205,6 @@ function ListingsPage() {
       {/* <ListingsHeader /> */}
       <SiteHeader />
       <main className={styles.listingspage}>
-        <div className={styles.actions}>
-          {/* return to neighborhoods page */}
-          <button
-            className={styles.addlisting}
-            onClick={() => navigate("/neighborhoods")}
-          >
-            ← Neighborhoods
-          </button>
-          {/* add a scrap = */}
-          <button
-            className={styles.addlisting}
-            onClick={() => setShowModal(true)}
-          >
-            + Add Listing
-          </button>
-        </div>
-
         {/* list of posted scraps */}
         <div className={styles.listingscontainer}>
           {loading && (
@@ -230,6 +218,22 @@ function ListingsPage() {
               No scraps posted yet - be the first!
             </p>
           )}
+
+          <div className={styles.actions}>
+            <div className={styles.neighborhoodName}>
+              <h1>{neighborhood?.name}</h1>
+            </div>
+
+            <div className={styles.buttons}>
+              {/* return to neighborhoods page */}
+              <button onClick={() => navigate("/neighborhoods")}>
+                ← Neighborhoods
+              </button>
+
+              {/* add a scrap */}
+              <button onClick={() => setShowModal(true)}>+ Add Listing</button>
+            </div>
+          </div>
 
           {/* filter options */}
           <div className={styles.filterbar}>

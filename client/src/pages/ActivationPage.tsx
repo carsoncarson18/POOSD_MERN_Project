@@ -40,7 +40,7 @@ export default function ActivationPage() {
     return (
         <div className="auth-page-wrapper">
             <SiteHeader />
-            
+
             <main className="auth-main">
                 <section className="auth-card activation-card">
                     {/* Display error message if request fails; otherwise show loading state */}
@@ -53,7 +53,7 @@ export default function ActivationPage() {
                     )}
                 </section>
             </main>
-            
+
             <SiteFooter />
         </div>
     );

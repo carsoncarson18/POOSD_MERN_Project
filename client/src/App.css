@@ -5,6 +5,7 @@
 
 :root {
   --main-color: #567357;
+  --foreground: #ffffff;
   --site-header-height: 80px;
 }
 
@@ -30,7 +31,7 @@
   }
 
   section {
-    color: var(--foreground);
+    color: #ffffff;
     background-color: var(--main-color);
     align-items: center;
     display: flex;
@@ -41,14 +42,13 @@
       margin: 30px 0;
     }
 
-    h2{
+    h2 {
       margin: 0;
     }
+
     p {
       width: 80%;
       text-align: center;
     }
   }
 }
-
-

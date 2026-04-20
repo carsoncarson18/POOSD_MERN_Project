@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./AddIngredientModal.module.css";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -138,7 +139,8 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
         formData.append("image", image);
       }
 
-      // send POST request to API
+      // replaced with axios
+      /* 
       const res = await fetch(`${API_URL}/api/createIngredient`, {
         method: "POST",
         headers: {
@@ -146,8 +148,6 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
         },
         body: formData,
       });
-
-      console.log("token here??? ", token);
 
       // Parse JSON response from server
       const json = await res.json();
@@ -162,6 +162,23 @@ export default function ({ neighborhoodId, token, onCreated, onClose }: Props) {
       }
       // sent to linstings page to update UI w/ new ingredient
       onCreated(json.ingredient);
+      */
+
+      // send POST request to API
+      const res = await axios.post(`${API_URL}/api/createIngredient`, {
+        name: form.name,
+        description: form.description,
+        expiresAt: form.expiresAt,
+        category: form.category,
+        neighborhood: neighborhoodId,
+        quantity: {
+          value: qtyNum,
+          unit: form.quantity_unit,
+        },
+      });
+
+      // sent to linstings page to update UI w/ new ingredient
+      onCreated(res.data.ingredient);
 
       // reset form
       setForm(EMPTY_FORM);

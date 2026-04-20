@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
@@ -9,6 +9,8 @@ export default function LoginPage() {
     // Access URL parameters to check for account activation status
     const [searchParams] = useSearchParams();
     const status = searchParams.get("status");
+
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         username: "",
@@ -27,9 +29,15 @@ export default function LoginPage() {
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, formData);
-            
+
+            // Saving token
+            const token = response.data.token;
+            localStorage.setItem("token", token);
+            // Setting global header for session
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
             // Temporary success feedback, will change later
-            alert("Login successful!");
+            navigate("/listingpage");
             console.log("Token:", response.data.token);
             
         } catch (err: any) {
@@ -64,7 +72,7 @@ export default function LoginPage() {
                     )}
                     {status === "success" && (
                         <p className="auth-status-info">
-                            Account verified! You can now log in.
+                            Account verified! You can now log in
                         </p>
                     )}
                     
@@ -91,8 +99,7 @@ export default function LoginPage() {
                                 value={formData.password}
                                 onChange={handleChange}
                             />
-                            {/* Placeholder for future password recovery logic */}
-                            <button type="button" className="password-button" onClick={() => alert("temp")}>
+                            <button type="button" className="password-button" onClick={() => navigate("/forgot-password")}>
                                 Forgot password?
                             </button>
                         </div>

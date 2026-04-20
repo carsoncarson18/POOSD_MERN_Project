@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import ListingsHeader from "../components/ListingHeader";
+import axios from "axios";
 import styles from "../styles/listings.module.css";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
@@ -43,7 +44,8 @@ function ListingsPage() {
 
   // vvvv switch back to this line vvvv
   // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
-  const token = localStorage.getItem("token");
+
+  // const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
   console.log("user object", user);
 
@@ -53,8 +55,19 @@ function ListingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  console.log("first ingredient postedBy:", listings[0]?.postedBy);
+  const filteredListings =
+    activeCategory === "all"
+      ? listings
+      : listings.filter((i) => i.category === activeCategory);
+
+  // gets categories that have items
+  const availableCategories = [
+    "all",
+    ...new Set(listings.map((i) => i.category)),
+  ];
 
   // if there isn't a neighborhood selected, go back to the neighborhoods page
   useEffect(() => {
@@ -65,25 +78,47 @@ function ListingsPage() {
     fetchListings();
   }, []);
 
+  // display claimmed ingredient message for 4 seconds
+  useEffect(() => {
+    if (claimSuccess) {
+      const timer = setTimeout(() => setClaimSuccess(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [claimSuccess]);
+
   // get the list of ingredients within a neighborhood
   async function fetchListings() {
     setLoading(true);
     setError("");
+    setActiveCategory("all");
+
     try {
-      const res = await fetch(
+      const res = await axios.get(
         `${API_URL}/api/getAllHoodIngredients?_id=${neighborhood!._id}`,
-        { headers: { Authorization: `Bearer ${token}` } },
+        // { headers: { Authorization: `Bearer ${token}` } },
       );
+
+      /*
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to Load listings");
 
-      // sort listings by expiration date
       setListings(
         json.ingredients
           .filter((i: Ingredient) => !i.claimed)
           .sort(
             (a: Ingredient, b: Ingredient) =>
               new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime(),
+          ),
+      );
+      */
+
+      // sort listings by expiration date
+      setListings(
+        res.data.ingredients
+          .filter((i: Ingredient) => !i.claimed)
+          .sort(
+            (a: Ingredient, b: Ingredient) =>
+              new Date(a.expiresAt).getDate() - new Date(b.expiresAt).getDate(),
           ),
       );
     } catch (err: any) {
@@ -97,15 +132,39 @@ function ListingsPage() {
   const handleCancel = () => setConfirmIndex(null);
 
   const handleConfirm = async (index: number) => {
-    const updated = [...listings];
-    updated[index].claimed = true;
-    setListings(updated.filter((i) => !i.claimed));
-    setConfirmIndex(null);
+    try {
+      const item = listings[index];
+      await axios.post(`${API_URL}/api/claimIngredient`, { _id: item._id });
+
+      /* // replaced with axios
+      const res = await fetch(`${API_URL}/api/claimIngredient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: item._id }),
+      });
+      if (!res.ok) throw new Error("Failed to claim");
+      */
+
+      // remove from listing and display confirmation
+      setListings((prev) => prev.filter((_, i) => i !== index));
+      setConfirmIndex(null);
+      setClaimSuccess(true);
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   // deleting an ingredient if the user posted it
   const handleDelete = async (id: string) => {
     try {
+      await axios.delete(`${API_URL}/api/deleteIngredient`, {
+        data: { _id: id },
+      });
+
+      /* replaced with axios
       const res = await fetch(`${API_URL}/api/deleteIngredient`, {
         method: "DELETE",
         headers: {
@@ -115,6 +174,8 @@ function ListingsPage() {
         body: JSON.stringify({ _id: id }),
       });
       if (!res.ok) throw new Error("Failed to delete");
+      */
+
       setListings((prev) => prev.filter((i) => i._id !== id));
     } catch (err: any) {
       alert(err.message);
@@ -133,9 +194,12 @@ function ListingsPage() {
       <main className={styles.listingspage}>
         <div className={styles.actions}>
           {/* return to neighborhoods page */}
-          <a className={styles.returnbutton} href="/neighborhoods">
+          <button
+            className={styles.addlisting}
+            onClick={() => navigate("/neighborhoods")}
+          >
             ← Neighborhoods
-          </a>
+          </button>
           {/* add a scrap = */}
           <button
             className={styles.addlisting}
@@ -158,8 +222,23 @@ function ListingsPage() {
               No scraps posted yet - be the first!
             </p>
           )}
+
+          {/* filter options */}
+          <div className={styles.filterbar}>
+            {availableCategories.map((cat) => (
+              <button
+                key={cat}
+                className={`${styles.filterbtn} ${activeCategory === cat ? styles.filterbtnactive : ""}`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* view listings in specific categories */}
           <div className={styles.listingsgrid}>
-            {listings.map((item, index) => (
+            {filteredListings.map((item, index) => (
               <IngredientCard
                 key={item._id}
                 item={item}
@@ -179,10 +258,18 @@ function ListingsPage() {
         {showModal && (
           <AddIngredientModal
             neighborhoodId={neighborhood!._id}
-            token={token}
+            token={null}
             onCreated={handleCreated}
             onClose={() => setShowModal(false)}
           />
+        )}
+
+        {/* claim success popup */}
+        {claimSuccess && (
+          <div className={styles.claimPopup}>
+            <p>Item Claimed!</p>
+            <p>The owner has been emailed and will be in touch.</p>
+          </div>
         )}
       </main>
       <SiteFooter />

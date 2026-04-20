@@ -162,23 +162,37 @@
   line-height: 1.4;
 }
 
-/* Center content within the activation card specifically */
 .activation-card {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 150px; /* Ensures the card isn't too flat when it's just one line of text */
+    min-height: 150px;
 }
 
-/* Loading text style */
 .auth-loading-text {
     font-size: 1.1rem;
     color: #333;
     font-family: sans-serif;
 }
 
-/* Ensure errors in the activation card don't have that big top margin */
 .activation-card .auth-error {
     margin: 0;
+}
+
+.auth-instruction {
+    margin-bottom: 1.5rem;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.auth-reset-info {
+  color: #007bc2;
+  font-size: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0rem;
+  text-align: center;
+  font-weight: 500;
 }

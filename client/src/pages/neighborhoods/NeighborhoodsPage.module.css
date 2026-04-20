@@ -52,7 +52,7 @@
 .searchBar {
     margin: 0 auto 30px;
     border-radius: 35px;
-    width: 45%;
+    width: 25%;
     height: 50px;
     display: block;
     border: 1px solid black;
@@ -73,7 +73,7 @@
 }
 
 .neighborhood, .createHoodPopup, .leaveHoodPopup  {
-    width: 70%;
+    width: 50%;
     min-height: 290px;
     background-color: beige;
     border: 2px solid white;

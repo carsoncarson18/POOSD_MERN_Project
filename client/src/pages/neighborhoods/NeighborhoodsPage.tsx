@@ -7,9 +7,17 @@ import LeaveNeighborhoodPopup from "./LeaveHoodPopup";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-const user = {
+const test_user = {
     _id:'69e44805f1875a28613fae5c'
 }
+
+let user = JSON.parse(localStorage.getItem("user") || "null");
+console.log(user);
+
+
+// if (!user) {
+//     user = test_user;
+// }
 
 
 const token = localStorage.getItem("token");
@@ -329,6 +337,7 @@ const CreateNeighborhoodPopup = ({zip, setJoinStatus=()=>{}, onCreate=()=>{}}:{z
 TODO: Make it so you can press enter for the create neighborhood form.
 More input validation and error checks.
 Make responsive for mobile.
+Display errors for incorrect n=hood names
 
 
 */

@@ -41,7 +41,7 @@ export default function NeighborHoodsPage()
     async function joinNeighborhood()
     {
        try {
-            const res = await fetch(`${API_URL}/api/joinHood?_id=${user._id}`, {
+            const res = await fetch(`${API_URL}/api/joinHood`, {
                 method:'post',
                 headers: {
                     "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export default function NeighborHoodsPage()
     async function fetchNeighborhoods() {
 
         try {
-            const res = await fetch(`${API_URL}/api/getAllUserHoods?_id=${user._id}`, {
+            const res = await fetch(`${API_URL}/api/getAllUserHoods`, {
                 method:'get',
                 headers: {
                     "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default function NeighborHoodsPage()
     {
         try {        
             
-            const res = await fetch(`${API_URL}/api/deleteUserHood?_id=${user._id}`, {
+            const res = await fetch(`${API_URL}/api/deleteUserHood`, {
                 method:'delete',
                 headers: {
                     "Content-Type": "application/json",
@@ -131,7 +131,7 @@ export default function NeighborHoodsPage()
             if (res.ok) {
                 fetchNeighborhoods();
                 // setJoinStatus(undefined);
-                console.log(json.message);
+                // console.log(json.message);
                 setError('');
             
             }
@@ -150,7 +150,7 @@ export default function NeighborHoodsPage()
         
         
         try {        
-            const res = await fetch(`${API_URL}/api/createHood?_id=${user._id}`, {
+            const res = await fetch(`${API_URL}/api/createHood`, {
                 method:'post',
                 headers: {
                     "Content-Type": "application/json",
@@ -187,6 +187,9 @@ export default function NeighborHoodsPage()
         }
     }
 
+    useEffect(()=>{
+        fetchNeighborhoods();
+    },[]);
 
     
     useEffect(() => {

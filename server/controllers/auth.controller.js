@@ -42,13 +42,19 @@ const signup = async (req, res) => {
     const isDupUsername = await User.findOne({ username: username });
     const isDupEmail = await User.findOne({ email: email });
 
-    if (isDupUsername) {
+    if (isDupEmail) {
+        if (!isDupEmail.isVerified) {
+          return res.status(401).json({
+          error: "Verification email already sent; please check your inbox",
+        });
+        } else {
+        return res.status(401).json({
+          error: "Email already taken; please choose another one",
+        });
+      }
+    } else if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
-      });
-    } else if (isDupEmail) {
-      return res.status(401).json({
-        error: "Email already taken; please choose another one",
       });
     } else {
       //hash with salt
@@ -121,12 +127,6 @@ const activateEmail = async (req, res) => {
 
     const { firstName, username, password, email } = user;
     console.log(user);
-    // Check if user already exists (in case they click the link twice)
-    const existingUser = await User.findOne({ email: email });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Account already activated!" });
-    }
 
     const newUser = await User.findByIdAndUpdate({isVerified: true});
 

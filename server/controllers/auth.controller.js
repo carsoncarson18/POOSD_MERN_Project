@@ -54,13 +54,6 @@ const signup = async (req, res) => {
       //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Set up new user for db, but don't add yet
-      // const user = {
-      //   firstName: firstName,
-      //   username: username,
-      //   password: hashedPassword,
-      //   email: email,
-      // };
       const newUser = await User.create({
         firstName: firstName,
         username: username,
@@ -104,9 +97,6 @@ const signup = async (req, res) => {
           .status(502)
           .json({ message: "Failed to do email verification :(" });
       }
-
-      // const retObj = newUser.toObject();
-      // delete retObj.password;
 
       // Return user data
       return res.json({
@@ -333,7 +323,7 @@ const activatePassword = async (req, res) => {
       // Ensure new password meets requirements
       const validatePassword = passwordValidator.safeParse(password);
       console.log(validatePassword.data);
-      
+
       if (!validatePassword.success) {
         const prettyError = z.flattenError(validatePassword.error);
         return res.status(400).json({

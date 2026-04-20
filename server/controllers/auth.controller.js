@@ -44,7 +44,7 @@ const signup = async (req, res) => {
 
     if (isDupEmail) {
       if (!isDupEmail.isVerified) {
-        return res.status(401).json({
+        return res.status(200).json({
           error: "Verification email already sent; please check your inbox",
         });
       } else {

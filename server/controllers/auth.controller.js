@@ -55,12 +55,18 @@ const signup = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Set up new user for db, but don't add yet
-      const newUser = {
-        firstName,
-        username,
-        hashedPassword,
-        email,
-      };
+      // const user = {
+      //   firstName: firstName,
+      //   username: username,
+      //   password: hashedPassword,
+      //   email: email,
+      // };
+      const newUser = await User.create({
+        firstName: firstName,
+        username: username,
+        password: hashedPassword,
+        email: email,
+      });
 
       const token = jwt.sign(
         {
@@ -132,12 +138,7 @@ const activateEmail = async (req, res) => {
       return res.status(400).json({ message: "Account already activated!" });
     }
 
-    const newUser = await User.create({
-      firstName: firstName,
-      username: username,
-      password: password,
-      email: email,
-    });
+    const newUser = await User.findByIdAndUpdate({isVerified: true});
 
     if (!newUser) {
       return res.status(400).json({ message: "Failed to create user" });
@@ -173,8 +174,38 @@ const login = async (req, res) => {
 
     // Check if user exists
     if (!user) {
-      return res.status(401).json({
+      return res.status(400).json({
         error: "Invalid login information; check your spelling",
+      });
+    }
+
+    if (!user.isVerified) {
+      const appUrl = getAppUrl();
+
+      if (!appUrl) {
+        return res.status(500).json({
+          error: "Frontend URL is not configured",
+        });
+      }
+
+      const token = jwt.sign(
+        {
+          userId: user._id
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" },
+      );
+
+      const url = `${appUrl}/activate/${token}`;
+      const verificationResult = await sendVerificationEmail(
+        validateLogin.email,
+        url,
+        "Verify your email address",
+        "Confirm Email",
+      );
+
+      return res.status(200).json({
+        details: "Verify your email to complete your registration; resent verification email!",
       });
     }
 
@@ -302,6 +333,7 @@ const activatePassword = async (req, res) => {
       // Ensure new password meets requirements
       const validatePassword = passwordValidator.safeParse(password);
       console.log(validatePassword.data);
+      
       if (!validatePassword.success) {
         const prettyError = z.flattenError(validatePassword.error);
         return res.status(400).json({

@@ -10,7 +10,7 @@ export default function LandingPage() {
             <div id="landing-page">
                 <SiteHeader/> 
                 <main style={{padding:'0 0 80px 0'}}>
-                    <div style={{padding:'0 0 70px 0',boxShadow:'0 8px 22px -15px black ',width:'100%', minHeight:'500px', position:'relative', zIndex:0, overflow:'visible', paddingTop: '90px', paddingBottom: '90px'}}>
+                    <div style={{padding:'0 0 70px 0',boxShadow:'0 8px 22px -15px black ',width:'100%', minHeight:'500px', position:'relative', zIndex:0, overflow:'hidden', paddingTop: '90px', paddingBottom: '90px'}}>
                         <img style={{width:'100%',height:'100%',opacity:.6,objectFit:'cover',objectPosition:'top',position:'absolute',bottom:0, filter:'blur(8px)', transform:'scale(1.05)'}} alt="Bag of Food Scraps" src={hero_image}/>
                         <div style={{
                                 zIndex:1, 
@@ -37,7 +37,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <section>
-                        <h1>How does Scraps Work?</h1>
+                        <h1>How does Scraps work?</h1>
                         <div style={{display:'flex',flexDirection:'column',gap:60}}>
                             <section>
                                 <h2>Create an Account</h2>

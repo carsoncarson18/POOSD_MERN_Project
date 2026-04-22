@@ -22,7 +22,7 @@ export default function Contact() {
             <SiteHeader/>
                 <main style={{minHeight:'100vh'}}>
                     <section>
-                        <form style={{display:'flex',flexDirection:'column',alignItems:'center'}} action={"mailto:autoscrapsmail@gmail.com?"} method="POST" encType="text/plain">
+                        <div className="emailForm" style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
                             <label>Contact Us</label>
                             <div style={{height:150,width:'100%',display:'flex',flexDirection:'column',alignItems:'center'}}>
                                 <p>
@@ -40,7 +40,7 @@ export default function Contact() {
                             <textarea style={{borderRadius:5}} required onChange={(event)=>{setText(event.target.value)}} value={text}/>
                                 <a className="button" onClick={()=>{if (text) {setHasError(false)} else {setHasError(true)};}} href={text? `mailto:autoscrapsmail@gmail.com?body=${text}` : '#'}> Email</a>
                             {/* <button onClick={()=>{if (text) {sendEmail(text); setHasError(false)} else {setHasError(true)}; setText("")}} type="button" >Submit</button> */}
-                        </form>
+                        </div>
                     </section>
                 </main>
             <SiteFooter/>

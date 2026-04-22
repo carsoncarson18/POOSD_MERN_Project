@@ -48,7 +48,7 @@ const carson : MemberData = {
 
 const mehreen : MemberData = {
     name:'Mehreen Khan',
-    description:'description',
+    description:'Worked on ingredient and authentication endpoints and corresponding data validation. ',
     role:'API Developer',
     sex:'female',
 }

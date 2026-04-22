@@ -10,8 +10,8 @@ export default function LandingPage() {
             <div id="landing-page">
                 <SiteHeader/> 
                 <main style={{padding:'0 0 80px 0'}}>
-                    <div style={{padding:'0 0 70px 0',boxShadow:'0 8px 22px -15px black ',width:'100%',height:'fit-content', position:'relative', zIndex:0, overflow:'hidden'}}>
-                        <img style={{width:'100%',height:'100%',opacity:.6,objectFit:'cover',position:'absolute',bottom:0}} alt="Bag of Food Scraps" src={hero_image}/>
+                    <div style={{padding:'0 0 70px 0',boxShadow:'0 8px 22px -15px black ',width:'100%', minHeight:'500px', position:'relative', zIndex:0, overflow:'visible', paddingTop: '90px', paddingBottom: '90px'}}>
+                        <img style={{width:'100%',height:'100%',opacity:.6,objectFit:'cover',objectPosition:'top',position:'absolute',bottom:0, filter:'blur(8px)', transform:'scale(1.05)'}} alt="Bag of Food Scraps" src={hero_image}/>
                         <div style={{
                                 zIndex:1, 
                                 width:'60%',
@@ -21,7 +21,7 @@ export default function LandingPage() {
                                 alignItems:'center',
                                 gap:15, 
                                 paddingTop:50,
-                                textShadow:'0 2px 5px black',
+                                textShadow:'0 2px 14px black',
                                 backdropFilter:'blur(2px)',
                                 margin:'0 auto'
                             }}>

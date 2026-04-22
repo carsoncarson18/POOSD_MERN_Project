@@ -20,22 +20,26 @@ export default function Contact() {
     return (
         <div id="contact">
             <SiteHeader/>
-                <main>
+                <main style={{minHeight:'100vh'}}>
                     <section>
-                        <form action={"mailto:idk"} method="post" encType="text/plain">
+                        <form style={{display:'flex',flexDirection:'column',alignItems:'center'}} action={"mailto:autoscrapsmail@gmail.com?"} method="POST" encType="text/plain">
                             <label>Contact Us</label>
-                            <p>
-                                Email us about any questions or concerns you may have regarding our app or developers.
-                            </p>
-                            {
-                                hasError?
-                                <p style={{color:'#ff3f3f',textShadow:'0 0px 1px black'}}>
-                                    Please enter in a valid value to send us an email.
+                            <div style={{height:150,width:'100%',display:'flex',flexDirection:'column',alignItems:'center'}}>
+                                <p>
+                                    Email us about any questions or concerns you may have regarding our app or developers.
                                 </p>
-                                : null
-                            }
-                            <textarea required onChange={(event)=>{setText(event.target.value)}} value={text}/>
-                            <button onClick={()=>{if (text) {sendEmail(text); setHasError(false)} else {setHasError(true)}; setText("")}} type="button" >Submit</button>
+                                {
+                                    hasError?
+                                    <p style={{color:'#6c2c2cff',textShadow:'0 0px 1px black'}}>
+                                        Please enter in a valid text value to send us an email.
+                                    </p>
+                                    : null
+                                }
+                            </div>
+                            
+                            <textarea style={{borderRadius:5}} required onChange={(event)=>{setText(event.target.value)}} value={text}/>
+                                <a className="button" onClick={()=>{if (text) {setHasError(false)} else {setHasError(true)};}} href={text? `mailto:autoscrapsmail@gmail.com?body=${text}` : '#'}> Email</a>
+                            {/* <button onClick={()=>{if (text) {sendEmail(text); setHasError(false)} else {setHasError(true)}; setText("")}} type="button" >Submit</button> */}
                         </form>
                     </section>
                 </main>

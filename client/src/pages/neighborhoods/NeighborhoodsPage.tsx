@@ -31,7 +31,7 @@ export default function NeighborHoodsPage()
     const navigate = useNavigate();
     
 
-    const [error, setError] = useState<String>("");
+    const [error, setError] = useState<string>("");
     const [neighborhoods,setNeighborhoods] = useState<Array<Hood>>();
     const [search, setSearch] = useState<string>('');
     const [joinStatus, setJoinStatus] = useState<string>();
@@ -55,20 +55,25 @@ export default function NeighborHoodsPage()
 
             if (!res.ok)
             {
-                console.error("Failed to search/join a neighborhood.");
+                console.error("Failed to search/join a neighborhood.....");
             }
 
             const json = await res.json();
             const status = json.status;
-
             setJoinStatus(status);
-            fetchNeighborhoods();
-            
-            
 
+            if (status=="joined")
+            {
+                setError("You are already in this neighborhood.");
+            }
+            else {
+                setError("");
+            }
+  
+            
    
         } catch (err: any) {
-            setError("Error With Fetching Hoods: " + err.message);
+            setError("Error With Joining Hoods: " + err.message);
         }  
     }
     
@@ -90,20 +95,10 @@ export default function NeighborHoodsPage()
             if (!res.ok) throw new Error(json.error || "Failed to Load Neighborhoods");
 
             setNeighborhoods(hoods);
-            setError('');
-
-        // const res = await fetch(
-        //     `${API_URL}/api/getAllHoodIngredients?_id=${neighborhood!._id}`,
-        //     { headers: { Authorization: `Bearer ${token}` } },
-        // );
-
    
         } catch (err: any) {
             setError("Error With Fetching Hoods: " + err.message);
         } 
-        // finally {
-        // setLoading(false);
-        // }
     }
 
     async function deleteNeighborhood(hood:Hood)
@@ -130,10 +125,7 @@ export default function NeighborHoodsPage()
 
             if (res.ok) {
                 fetchNeighborhoods();
-                // setJoinStatus(undefined);
-                // console.log(json.message);
                 setError('');
-            
             }
 
             setHoodLeaving(undefined);
@@ -168,6 +160,16 @@ export default function NeighborHoodsPage()
                 fetchNeighborhoods();
                 setJoinStatus(undefined);
                 setError('');
+                setSearch('');
+            }
+            else {
+                const errorData = await res.json();
+                const err = errorData.errors.formErrors[0];
+                if (err)
+                {
+                    setError(err);
+                }
+                
             }
 
             return res;
@@ -191,67 +193,47 @@ export default function NeighborHoodsPage()
         fetchNeighborhoods();
     },[]);
 
+    useEffect(()=>{
+        if (joinStatus=="joined")
+        {
+            fetchNeighborhoods();
+        }
+        
+    },[joinStatus]);
+
     
     useEffect(() => {
-        // createNeighborhood()
-        const form = formRef.current;
-        
-
-        if (form) {
-            form.addEventListener('submit',(e)=>{
-                // console.log("f: ",search);
-                e.preventDefault();
-                const data = new FormData(e.target as HTMLFormElement);
-                const val = data.get('search')?.toString();
- 
-                if (val?.toString().length==5 && Number(val)) {
-                    // console.log(val);
-                    
-                    setSearch(val);
-                    // console.log(search);
-                    
-                    
-                    
-                    joinNeighborhood();
-                    fetchNeighborhoods();
-                    console.log('submitted form!');
-                }
-            });
-        }
-
         fetchNeighborhoods();
-    }, [search]);
+    }, []);
+
 
     return (
         <>
             <SiteHeader/>
                 {
                     hoodLeaving?
-                    <LeaveNeighborhoodPopup onLeaveHood={deleteNeighborhood} setHoodLeaving={setHoodLeaving} hood={hoodLeaving}/>
+                    <LeaveNeighborhoodPopup setError={setError} onLeaveHood={deleteNeighborhood} setHoodLeaving={setHoodLeaving} hood={hoodLeaving}/>
                     :null
                 }
                 {
                     joinStatus=="new" ?
-                    <CreateNeighborhoodPopup zip={search} setJoinStatus={setJoinStatus} onCreate={createNeighborhood}/>
+                    <CreateNeighborhoodPopup setError={setError} error={error} zip={search} setJoinStatus={setJoinStatus} onCreate={createNeighborhood}/>
                     : null
                 }
                 <main className={styles.neighborhoodsPage}>
                     
                     
                     <h1>My Neighborhoods</h1>
-                    <div style={{height:70}}>
+                    <div style={{height:100}}>
                         <p>Enter a zip code to join a neighborhood or create one if it does not exist!</p>
                         {
-                            !error?
+                            error?
                             <p className={styles.errorMessage}>{error}</p>
                             :null
                         }
                     </div>
-                    
-                    <form ref={formRef} id="join-hood-form">
-                        <SearchBar search={search} setSearch={setSearch}/>
-                        <button className={`${styles.joinButton} ${search.length == 5 ? '': styles.inactive}`}>Join!</button>
-                    </form>
+                    <SearchBar search={search} setSearch={setSearch}/>
+                    <button onClick={joinNeighborhood} className={`${styles.joinButton} ${search.length == 5 ? '': styles.inactive}`}>Join!</button>
                     {
                         neighborhoods && neighborhoods.length>0?
                         <div className={styles.neighborhoodsContainer}>
@@ -297,16 +279,17 @@ const SearchBar = ({search,setSearch}:{search:string,setSearch:Function})=>{
     );
 }
 
-const CreateNeighborhoodPopup = ({zip, setJoinStatus=()=>{}, onCreate=()=>{}}:{zip:string,setJoinStatus:Function,onCreate:onCreate}) =>
+const CreateNeighborhoodPopup = ({setError,error="",zip, setJoinStatus=()=>{}, onCreate=()=>{}}:{setError:Function,error:string,zip:string,setJoinStatus:Function,onCreate:onCreate}) =>
 {
     const [name, setName] = useState<string>();
 
     return (
         <div style={{width:'100vw',height:'100vh',position:'absolute',display:'flex',flexDirection:'row',justifyContent:'center',marginTop:'var(--site-header-height)',zIndex:1}}>
             <div className={styles.createHoodPopup}>
-                <button style={{margin:'10px 10px 0px auto'}} onClick={()=>{setJoinStatus(undefined);}}>Exit</button>
+                <button style={{margin:'10px 10px 0px auto'}} onClick={()=>{setJoinStatus(undefined);setError("");}}>Exit</button>
                 <div style={{display:'flex',flexDirection:'column',gap:20,margin:'0 0 30px',width:'100%',alignItems:'center'}}>
                     <p>There is no neighborhood for this zip code. Be the first to name it!</p>
+                    <p className={styles.errorMessage}>{error}</p>
                     <label>Enter Name:</label>
                     <input onChange={(e)=>{setName(e.target.value)}} value={name} type="text"/>
                     <label>Zip Code: {zip}</label>

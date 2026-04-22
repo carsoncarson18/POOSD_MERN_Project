@@ -1,3 +1,6 @@
+// AI-assisted: Development of token-based password reset logic, including URL parameter extraction 
+// and multi-step frontend validation for password complexity
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";

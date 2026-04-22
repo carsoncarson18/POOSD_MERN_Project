@@ -1,3 +1,6 @@
+// AI-assisted: Development of registration form state management and refined logic for parsing 
+// backend validation errors (Zod) to provide specific, user-friendly field feedback
+
 import { useState } from "react";
 import axios from "axios";
 import SiteHeader from "../components/SiteHeader/SiteHeader";

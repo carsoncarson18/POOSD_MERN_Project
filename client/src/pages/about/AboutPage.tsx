@@ -76,7 +76,7 @@ const zainab : MemberData = {
 
 const noam : MemberData = {
     name:'Noam Chemla',
-    description:'description',
+    description:'Worked on user experience for signing up, logging in, email authentication, and forgot password',
     role:'Frontend Developer',
     sex:'male',
 }
@@ -106,7 +106,7 @@ export default function AboutPage()
                             <p>
                                 We are Team 1 of the 2026 Processes of Object Oriented Software Design (POOSD) MERN project.
                                 Out team comprised of 7 people, 3 of which were assigned with developing our frontend, 2 were
-                                on the backend, 1 build our mobile app, and 1 was our project manager and database architect.
+                                on the backend, 1 built our mobile app, and 1 was our project manager and database architect.
                             </p>
                         </section>
                         <section style={{width:'100%'}}>

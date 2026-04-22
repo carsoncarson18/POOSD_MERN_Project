@@ -1,3 +1,6 @@
+// AI-assisted: Implementation of client-side email validation and asynchronous form state management,
+// managing loading indicators and dynamic feedback based on backend validation responses
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -59,7 +62,7 @@ export default function ForgotPasswordPage() {
                 <section className="auth-card">
                     <h1>Reset Password</h1>
                     <p className="auth-instruction">
-                        Enter your email address and we'll send you a link to reset your password
+                        Enter your email address and we'll send you a link to reset your password.
                     </p>
 
                     <form className="auth-form" onSubmit={handleSubmit} noValidate>

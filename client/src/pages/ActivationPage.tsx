@@ -1,3 +1,7 @@
+// AI-assisted: Developed the automated account verification flow using URL tokens. 
+// Includes implementation of a useRef guard to prevent redundant API calls during 
+// React re-renders and status-based navigation for account verification success
+
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";

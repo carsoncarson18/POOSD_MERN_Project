@@ -128,20 +128,46 @@ const activateEmail = async (req, res) => {
     const { firstName, username, password, email } = user;
     console.log(user);
 
-    const newUser = await User.findByIdAndUpdate({ isVerified: true });
+    // Check if user already exists and is verified
+    const existingUser = await User.findOne({ email: email });
+
+    if (existingUser?.isVerified) {
+      return res.status(400).json({ message: "Account already activated!" });
+    }
+
+    if (existingUser) {
+      // User exists but not verified — mark as verified
+      const updated = await User.findByIdAndUpdate(
+        existingUser._id,
+        { isVerified: true },
+        { new: true }
+      );
+      return res.json({
+        message: "Account has been successfully activated! Please login!",
+        user: updated,
+      });
+    }
+
+    // User doesn't exist yet — create them
+    const newUser = await User.create({
+      firstName,
+      username,
+      password,
+      email,
+      isVerified: true,
+    });
 
     if (!newUser) {
       return res.status(400).json({ message: "Failed to create user" });
     }
+
     return res.json({
       message: "Account has been successfully activated! Please login!",
       user: newUser,
     });
   } catch (err) {
-    console.error("Error saving user data:", err); // fail
-    res
-      .status(500)
-      .json({ error: "Failed to save user", details: err.message });
+    console.error("Error saving user data:", err);
+    res.status(500).json({ error: "Failed to save user", details: err.message });
   }
 };
 

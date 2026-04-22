@@ -188,12 +188,6 @@ export default function NeighborHoodsPage() {
 
     }, [joinStatus]);
 
-
-    useEffect(() => {
-        fetchNeighborhoods();
-    }, []);
-
-
     return (
         <>
             <SiteHeader />
@@ -250,9 +244,9 @@ const Neighborhood = ({ hood, onEnter = () => { }, setHoodLeaving }: { hood: Hoo
         <div className={styles.neighborhood}>
             <p>{hood.name}</p>
             <p>Zip Code: {hood.zipCode}</p>
-            <button onClick={() => { onEnter(hood) }}>Enter</button>
+            <button className={styles.button} onClick={()=>{onEnter(hood)}}>Enter</button>
             {
-                <button onClick={() => { setHoodLeaving(hood) }}>Leave Neighborhood</button>
+                <button className={styles.leaveHoodButton} onClick={()=>{setHoodLeaving(hood)}}>Leave Neighborhood</button>
             }
         </div>
     );

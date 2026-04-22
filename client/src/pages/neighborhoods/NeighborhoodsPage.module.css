@@ -33,9 +33,11 @@
     border-radius: 20px;
     border: 1px solid black;
     color: black;
+    background-color: #ccc;
 
     &:hover {
-
+        padding: 5px 20px;
+        font-size: 1.3rem;
     }
 }
 
@@ -106,6 +108,12 @@
         font-size: 1.3rem;
         display: block;
         margin: 0 auto;
+        border: 1px solid black;
+        background-color: #576958;
+    }
+
+    .leaveHoodButton {
+        background-color: #b95753;
     }
 }
 
@@ -135,6 +143,8 @@
         border-radius: 10px;
         text-align: center;
     }
+
+    
 }
 
 .leaveHoodPopupContainer {

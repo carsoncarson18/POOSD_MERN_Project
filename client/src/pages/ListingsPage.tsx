@@ -49,7 +49,6 @@ function ListingsPage() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
   // console.log("user object", user);
 
-
   // main states
   const [listings, setListings] = useState<Ingredient[]>([]);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
@@ -58,6 +57,7 @@ function ListingsPage() {
   const [showModal, setShowModal] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [editingItem, setEditingItem] = useState<Ingredient | null>(null);
 
   const filteredListings =
     activeCategory === "all"
@@ -144,7 +144,7 @@ function ListingsPage() {
       await axios.post(
         `${API_URL}/api/claimIngredient`,
         { _id: item._id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       /* // replaced with axios
@@ -174,7 +174,7 @@ function ListingsPage() {
       const token = localStorage.getItem("token");
       await axios.delete(`${API_URL}/api/deleteIngredient`, {
         data: { _id: id },
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       /* replaced with axios
@@ -190,6 +190,26 @@ function ListingsPage() {
       */
 
       setListings((prev) => prev.filter((i) => i._id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  //
+  const handleEdit = async (id: string, updatedFields: Partial<Ingredient>) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${API_URL}/api/editIngredient`,
+        { _id: id, ...updatedFields },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setListings((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, ...updatedFields } : item,
+        ),
+      );
     } catch (err: any) {
       alert(err.message);
     }
@@ -261,6 +281,7 @@ function ListingsPage() {
                 onConfirm={handleConfirm}
                 onCancel={handleCancel}
                 onDelete={handleDelete}
+                onEdit={(item) => setEditingItem(item)}
               />
             ))}
           </div>
@@ -273,6 +294,21 @@ function ListingsPage() {
             token={null}
             onCreated={handleCreated}
             onClose={() => setShowModal(false)}
+          />
+        )}
+
+        {editingItem && (
+          <AddIngredientModal
+            neighborhoodId={neighborhood!._id}
+            token={null}
+            existingIngredient={editingItem}
+            onCreated={(updated) => {
+              setListings((prev) =>
+                prev.map((i) => (i._id === updated._id ? updated : i)),
+              );
+              setEditingItem(null);
+            }}
+            onClose={() => setEditingItem(null)}
           />
         )}
 

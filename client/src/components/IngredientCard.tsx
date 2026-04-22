@@ -22,6 +22,7 @@ type Props = {
   onConfirm: (index: number) => void;
   onCancel: () => void;
   onDelete: (id: string) => void;
+  onEdit: (item: Ingredient) => void;
 };
 
 export default function IngredientCard({
@@ -33,6 +34,7 @@ export default function IngredientCard({
   onConfirm,
   onCancel,
   onDelete,
+  onEdit,
 }: Props) {
   const isOwner = currentUserId && item.postedBy === currentUserId;
   const posted = new Date(item.createdAt).toLocaleDateString();
@@ -66,12 +68,20 @@ export default function IngredientCard({
         <div className={styles.buttongroup}>
           {/* if the user is the owner of the listing, the button option is to delete it */}
           {isOwner ? (
-            <button
-              className={styles.btncancel}
-              onClick={() => onDelete(item._id)}
-            >
-              Remove
-            </button>
+            <div>
+              <button
+                className={styles.btnconfirm}
+                onClick={() => onEdit(item)}
+              >
+                Edit
+              </button>
+              <button
+                className={styles.btncancel}
+                onClick={() => onDelete(item._id)}
+              >
+                Remove
+              </button>
+            </div>
           ) : confirmIndex === index ? (
             <>
               <button

@@ -214,7 +214,7 @@ const login = async (req, res) => {
 
       const url = `${appUrl}/activate/${token}`;
       const verificationResult = await sendVerificationEmail(
-        validateLogin.email,
+        user.email,
         url,
         "Verify your email address",
         "Confirm Email",

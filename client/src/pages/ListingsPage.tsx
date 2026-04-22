@@ -139,7 +139,7 @@ function ListingsPage() {
 
   const handleConfirm = async (index: number) => {
     try {
-      const item = listings[index];
+      const item = filteredListings[index];
       const token = localStorage.getItem("token");
       await axios.post(
         `${API_URL}/api/claimIngredient`,

@@ -1,3 +1,6 @@
+// AI-assisted: Implementation of login session management via localStorage, status-based UI 
+// feedback for account activation, and integrated navigation for the password recovery flow
+
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";

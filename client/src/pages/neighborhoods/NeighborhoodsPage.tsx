@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import SiteFooter from "../../components/SiteFooter/SiteFooter";
 import SiteHeader from "../../components/SiteHeader/SiteHeader";
 import styles from "./NeighborhoodsPage.module.css"
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LeaveNeighborhoodPopup from "./LeaveHoodPopup";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
@@ -11,50 +11,43 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 let user = JSON.parse(localStorage.getItem("user") || "null");
 // console.log(user);
 
-
-const token = localStorage.getItem("token");
-
 export interface Hood {
-    _id:string,
-    name:string,
-    zipCode:string,
-    createdBy:string
+    _id: string,
+    name: string,
+    zipCode: string,
+    createdBy: string
 }
 
+type onCreate = (name: string, zipCode: string) => void;
 
 
-type onCreate = (name:string,zipCode:string) => void;
-
-
-export default function NeighborHoodsPage()
-{
+export default function NeighborHoodsPage() {
     const navigate = useNavigate();
-    
+
 
     const [error, setError] = useState<string>("");
-    const [neighborhoods,setNeighborhoods] = useState<Array<Hood>>();
+    const [neighborhoods, setNeighborhoods] = useState<Array<Hood>>();
     const [search, setSearch] = useState<string>('');
     const [joinStatus, setJoinStatus] = useState<string>();
-    const [hoodLeaving,setHoodLeaving] = useState<Hood>();
+    const [hoodLeaving, setHoodLeaving] = useState<Hood>();
     const formRef = useRef<HTMLFormElement | null>(null);
 
-    async function joinNeighborhood()
-    {
-       try {
+    async function joinNeighborhood() {
+        try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/joinHood`, {
-                method:'post',
+                method: 'post',
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     zipCode: Number(search)
-                }) 
-                
+                })
+
             });
 
-            if (!res.ok)
-            {
+            if (!res.ok) {
                 console.error("Failed to search/join a neighborhood.....");
             }
 
@@ -62,27 +55,27 @@ export default function NeighborHoodsPage()
             const status = json.status;
             setJoinStatus(status);
 
-            if (status=="joined")
-            {
+            if (status == "joined") {
                 setError("You are already in this neighborhood.");
             }
             else {
                 setError("");
             }
-  
-            
-   
+
+
+
         } catch (err: any) {
             setError("Error With Joining Hoods: " + err.message);
-        }  
+        }
     }
-    
+
 
     async function fetchNeighborhoods() {
 
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/getAllUserHoods`, {
-                method:'get',
+                method: 'get',
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
@@ -95,33 +88,32 @@ export default function NeighborHoodsPage()
             if (!res.ok) throw new Error(json.error || "Failed to Load Neighborhoods");
 
             setNeighborhoods(hoods);
-   
+
         } catch (err: any) {
             setError("Error With Fetching Hoods: " + err.message);
-        } 
+        }
     }
 
-    async function deleteNeighborhood(hood:Hood)
-    {
-        try {        
-            
+    async function deleteNeighborhood(hood: Hood) {
+        try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/deleteUserHood`, {
-                method:'delete',
+                method: 'delete',
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 },
-  
+
                 body: JSON.stringify({
-                    _id:hood._id
+                    _id: hood._id
                 }),
-                
+
             });
 
             const json = await res.json();
 
-           
-            
+
+
 
             if (res.ok) {
                 fetchNeighborhoods();
@@ -132,28 +124,28 @@ export default function NeighborHoodsPage()
 
             return res;
         }
-        catch (err:any)
-        {
+        catch (err: any) {
             setError("Error With Deleting Hood: " + err.message);
         }
     }
 
-    async function createNeighborhood(name:string,zipCode:string) {
-        
-        
-        try {        
+    async function createNeighborhood(name: string, zipCode: string) {
+
+
+        try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/createHood`, {
-                method:'post',
+                method: 'post',
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 },
-  
+
                 body: JSON.stringify({
-                    name:name,
+                    name: name,
                     zipCode: Number(zipCode),
                 }),
-                
+
             });
 
             if (res.ok) {
@@ -165,43 +157,38 @@ export default function NeighborHoodsPage()
             else {
                 const errorData = await res.json();
                 const err = errorData.errors.formErrors[0];
-                if (err)
-                {
+                if (err) {
                     setError(err);
                 }
-                
+
             }
 
             return res;
         }
-        catch (err:any)
-        {
-            console.log("ERROR: ",err.message);
-            
+        catch (err: any) {
+            console.log("ERROR: ", err.message);
+
         }
     }
 
-    function onEnterHood(hood:Hood)
-    {
-        if (hood)
-        {
-            navigate('/listingpage',{state:{neighborhood:hood}});
+    function onEnterHood(hood: Hood) {
+        if (hood) {
+            navigate('/listingpage', { state: { neighborhood: hood } });
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchNeighborhoods();
-    },[]);
+    }, []);
 
-    useEffect(()=>{
-        if (joinStatus=="joined")
-        {
+    useEffect(() => {
+        if (joinStatus == "joined") {
             fetchNeighborhoods();
         }
-        
-    },[joinStatus]);
 
-    
+    }, [joinStatus]);
+
+
     useEffect(() => {
         fetchNeighborhoods();
     }, []);
@@ -209,93 +196,92 @@ export default function NeighborHoodsPage()
 
     return (
         <>
-            <SiteHeader/>
-                {
-                    hoodLeaving?
-                    <LeaveNeighborhoodPopup setError={setError} onLeaveHood={deleteNeighborhood} setHoodLeaving={setHoodLeaving} hood={hoodLeaving}/>
-                    :null
-                }
-                {
-                    joinStatus=="new" ?
-                    <CreateNeighborhoodPopup setError={setError} error={error} zip={search} setJoinStatus={setJoinStatus} onCreate={createNeighborhood}/>
+            <SiteHeader />
+            {
+                hoodLeaving ?
+                    <LeaveNeighborhoodPopup setError={setError} onLeaveHood={deleteNeighborhood} setHoodLeaving={setHoodLeaving} hood={hoodLeaving} />
                     : null
-                }
-                <main className={styles.neighborhoodsPage}>
-                    
-                    
-                    <h1>My Neighborhoods</h1>
-                    <div style={{height:100}}>
-                        <p>Enter a zip code to join a neighborhood or create one if it does not exist!</p>
-                        {
-                            error?
-                            <p className={styles.errorMessage}>{error}</p>
-                            :null
-                        }
-                    </div>
-                    <SearchBar search={search} setSearch={setSearch}/>
-                    <button onClick={joinNeighborhood} className={`${styles.joinButton} ${search.length == 5 ? '': styles.inactive}`}>Join!</button>
+            }
+            {
+                joinStatus == "new" ?
+                    <CreateNeighborhoodPopup setError={setError} error={error} zip={search} setJoinStatus={setJoinStatus} onCreate={createNeighborhood} />
+                    : null
+            }
+            <main className={styles.neighborhoodsPage}>
+
+
+                <h1>My Neighborhoods</h1>
+                <div style={{ height: 100 }}>
+                    <p>Enter a zip code to join a neighborhood or create one if it does not exist!</p>
                     {
-                        neighborhoods && neighborhoods.length>0?
+                        error ?
+                            <p className={styles.errorMessage}>{error}</p>
+                            : null
+                    }
+                </div>
+                <SearchBar search={search} setSearch={setSearch} />
+                <button onClick={joinNeighborhood} className={`${styles.joinButton} ${search.length == 5 ? '' : styles.inactive}`}>Join!</button>
+                {
+                    neighborhoods && neighborhoods.length > 0 ?
                         <div className={styles.neighborhoodsContainer}>
-                                {
-                                    neighborhoods.map((hood,i)=>{
-                                    return <Neighborhood setHoodLeaving={setHoodLeaving} hood={hood} onEnter={onEnterHood}  key={i}/>
+                            {
+                                neighborhoods.map((hood, i) => {
+                                    return <Neighborhood setHoodLeaving={setHoodLeaving} hood={hood} onEnter={onEnterHood} key={i} />
                                 })}
                         </div>
                         :
                         <p>No neighborhoods Found.</p>
-                    }
-                    
-                </main>
-                
-            <SiteFooter/>
+                }
+
+            </main>
+
+            <SiteFooter />
         </>
     )
 }
 
 
 
-const Neighborhood = ({hood, onEnter=()=>{}, setHoodLeaving}:{hood:Hood,onEnter:Function,setHoodLeaving:Function}) => {
+const Neighborhood = ({ hood, onEnter = () => { }, setHoodLeaving }: { hood: Hood, onEnter: Function, setHoodLeaving: Function }) => {
 
-  
+
 
     return (
         <div className={styles.neighborhood}>
             <p>{hood.name}</p>
             <p>Zip Code: {hood.zipCode}</p>
-            <button onClick={()=>{onEnter(hood)}}>Enter</button>
+            <button onClick={() => { onEnter(hood) }}>Enter</button>
             {
-                <button onClick={()=>{setHoodLeaving(hood)}}>Leave Neighborhood</button>
+                <button onClick={() => { setHoodLeaving(hood) }}>Leave Neighborhood</button>
             }
         </div>
     );
 }
 
-const SearchBar = ({search,setSearch}:{search:string,setSearch:Function})=>{
+const SearchBar = ({ search, setSearch }: { search: string, setSearch: Function }) => {
 
 
     return (
-        <input name="search" onChange={(event)=>{if (event.target.value.length <=5 && Number.isInteger(+event.target.value)) {setSearch(event.target.value);}}} value={search} className={styles.searchBar}/>
+        <input name="search" onChange={(event) => { if (event.target.value.length <= 5 && Number.isInteger(+event.target.value)) { setSearch(event.target.value); } }} value={search} className={styles.searchBar} />
     );
 }
 
-const CreateNeighborhoodPopup = ({setError,error="",zip, setJoinStatus=()=>{}, onCreate=()=>{}}:{setError:Function,error:string,zip:string,setJoinStatus:Function,onCreate:onCreate}) =>
-{
+const CreateNeighborhoodPopup = ({ setError, error = "", zip, setJoinStatus = () => { }, onCreate = () => { } }: { setError: Function, error: string, zip: string, setJoinStatus: Function, onCreate: onCreate }) => {
     const [name, setName] = useState<string>();
 
     return (
-        <div style={{width:'100vw',height:'100vh',position:'absolute',display:'flex',flexDirection:'row',justifyContent:'center',marginTop:'var(--site-header-height)',zIndex:1}}>
+        <div style={{ width: '100vw', height: '100vh', position: 'absolute', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 'var(--site-header-height)', zIndex: 1 }}>
             <div className={styles.createHoodPopup}>
-                <button style={{margin:'10px 10px 0px auto'}} onClick={()=>{setJoinStatus(undefined);setError("");}}>Exit</button>
-                <div style={{display:'flex',flexDirection:'column',gap:20,margin:'0 0 30px',width:'100%',alignItems:'center'}}>
+                <button style={{ margin: '10px 10px 0px auto' }} onClick={() => { setJoinStatus(undefined); setError(""); }}>Exit</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20, margin: '0 0 30px', width: '100%', alignItems: 'center' }}>
                     <p>There is no neighborhood for this zip code. Be the first to name it!</p>
                     <p className={styles.errorMessage}>{error}</p>
                     <label>Enter Name:</label>
-                    <input onChange={(e)=>{setName(e.target.value)}} value={name} type="text"/>
+                    <input onChange={(e) => { setName(e.target.value) }} value={name} type="text" />
                     <label>Zip Code: {zip}</label>
-                    <button onClick={()=>{if (name && zip) {onCreate(name,zip)}}}>Create Neighborhood</button>
+                    <button onClick={() => { if (name && zip) { onCreate(name, zip) } }}>Create Neighborhood</button>
                 </div>
-                
+
             </div>
         </div>
     );

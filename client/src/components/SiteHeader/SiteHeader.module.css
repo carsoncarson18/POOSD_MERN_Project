@@ -92,9 +92,8 @@ button {
     white-space: nowrap;
     text-decoration: none;
     color: var(--foreground);
-    flex: 1;
-    padding: 0px;
-    width: 95px;
+    padding: 0 10px;
+    width: fit-content;
     text-align: center;
     height: 100%;
     display: flex;

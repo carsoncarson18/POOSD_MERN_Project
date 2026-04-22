@@ -48,7 +48,7 @@ const carson : MemberData = {
 
 const mehreen : MemberData = {
     name:'Mehreen Khan',
-    description:'description',
+    description:'Worked on ingredient and authentication endpoints and corresponding data validation. ',
     role:'API Developer',
     sex:'female',
 }
@@ -104,9 +104,9 @@ export default function AboutPage()
                         <section>
                             <h1>About Us</h1>
                             <p>
-                                We are Team 1 of the 2026 Processes of Object Oriented Software Design (POOSD) MERN project.
-                                Out team comprised of 7 people, 3 of which were assigned with developing our frontend, 2 were
-                                on the backend, 1 built our mobile app, and 1 was our project manager and database architect.
+                                We are Team 1 of the 2026 Processes of Object Oriented Software Design (POOSD) MERN projects.
+                                Our team is comprised of 7 people: 3 frontend developers, 2 backend developers, 1 mobile app 
+                                developer, and 1 project manager and database architect.
                             </p>
                         </section>
                         <section style={{width:'100%'}}>
@@ -132,7 +132,7 @@ export default function AboutPage()
                             <h1>Our Tech Stack</h1>
                             <p>
                                 For our tech stack, we used the MERN framework to build our website and Flutter
-                                to build our mobile app. GitHub was used for version control and setting up our 
+                                to build our mobile app. We used GitHub for version control and for setting up our 
                                 CI/CD pipeline using GitHub actions. We used discord to communicate with each other,
                                 and Figma to design and prototype our apps.
                             </p>

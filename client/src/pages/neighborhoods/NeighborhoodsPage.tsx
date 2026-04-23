@@ -54,8 +54,9 @@ export default function NeighborHoodsPage() {
             const json = await res.json();
             const status = json.status;
             setJoinStatus(status);
+            
 
-            if (status == "joined") {
+            if (status == "joined" && search) {
                 setError("You are already in this neighborhood.");
             }
             else {
@@ -84,6 +85,10 @@ export default function NeighborHoodsPage() {
 
             const json = await res.json();
             const hoods = json.neighborhoods;
+            if (Array.isArray(hoods))
+            {
+                hoods.reverse();
+            }
 
             if (!res.ok) throw new Error(json.error || "Failed to Load Neighborhoods");
 

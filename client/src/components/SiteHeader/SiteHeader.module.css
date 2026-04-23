@@ -76,9 +76,10 @@
 @media (max-width: 800px) {
     .siteHeader {
 
-        li {
+        ul {
             a {
-                font-size: .9rem;
+                font-size: .8rem;
+                width: 70px !important;
             }
         }
 

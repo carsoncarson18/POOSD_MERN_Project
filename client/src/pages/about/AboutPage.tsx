@@ -41,7 +41,7 @@ const default_person : MemberData = {
 
 const carson : MemberData = {
     name:'carson davie',
-    description:'descriptionawdddddddddd ddddddddddd dddddd\nawdddddddd ddddddddd ddd\n\nadwwwwwww\n\n\nadwadwawccccccccc ccccccccc ccccccccccc ccccccccccc cccccccccccc cccccccccccc cccccccccvvv vvvvvv vvvsd',
+    description:'Set up our droplet, CI/CD pipeline, database, and GitHub. Created our models and debugged both backend and frontend.',
     role:'Project Manager and Database Architect',
     sex:'male',
 }
@@ -55,35 +55,35 @@ const mehreen : MemberData = {
 
 const george : MemberData = {
     name:'George Avdella',
-    description:'description',
+    description:'Worked on neighborhoods endpoints, validation with REGEX, and JWT implementation.',
     role:'API developer',
     sex:'male',
 }
 
 const drake : MemberData = {
     name:'Drake Austin',
-    description:'description',
+    description:'Developed our mobile web app using Flutter and helped ensure mobile responsiveness and functionality.',
     role:'Flutter Developer',
     sex:'male',
 }
 
 const zainab : MemberData = {
     name:'Zainab Syed',
-    description:'description',
+    description:'Created our listing page and enabled all listing operations and listing view and filter functionality.',
     role:'Frontend Developer',
     sex:'female',
 }
 
 const noam : MemberData = {
     name:'Noam Chemla',
-    description:'Worked on user experience for signing up, logging in, email authentication, and forgot password',
+    description:'Worked on user experience for signing up, logging in, email authentication, and forgot password.',
     role:'Frontend Developer',
     sex:'male',
 }
 
 const nahum : MemberData = {
     name:'Nahum Auguste',
-    description:'description',
+    description:'Created site landing page, about page, neighborhoods page, and contact page.',
     role:'Frontend Developer',
     sex:'male',
 }
@@ -97,9 +97,9 @@ export default function AboutPage()
     return (
         <div id="about-page" className={styles.aboutPage}>
             <SiteHeader/>
-                <main>
-                    {
-                    !person?
+                <main style={{paddingTop:'80px'}}>
+                    {/* {
+                    !person? */}
                     <>
                         <section>
                             <h1>About Us</h1>
@@ -115,9 +115,10 @@ export default function AboutPage()
                                 display:'flex',
                                 flexDirection:'row',
                                 flexWrap:'wrap',
-                                justifyContent:'space-evenly',
+                                justifyContent:'center',
                                 rowGap:70,
-                                width:'60%'
+                                gap:10,
+                                width:'80%'
                             }}>
                                 <Card person={carson} setPerson={setPerson} />
                                 <Card person={mehreen} setPerson={setPerson} />
@@ -141,14 +142,13 @@ export default function AboutPage()
                                 <p>
                                     We used MongoDB as our non-relational database.
                                 </p>
-                                <img style={{objectFit:'contain',width:'80%',height:'100%'}} src={er_diagram}/>
+                                <img className={styles.img} style={{objectFit:'contain',height:'100%'}} src={er_diagram}/>
                             </section>
                             <section>
                                 <h2>Express.js</h2>
                                 <p>Express.js was used manage api calls and request routing between the frontend
                                     and our MongoDB database.
                                 </p>
-                                <p>INSERT DIAGRAMS</p>
                             </section>
                             <section>
                                 <h2>React.js</h2>
@@ -165,16 +165,16 @@ export default function AboutPage()
                             <section>
                                 <h2>Figma</h2>
                                 <p>
-                                    We designed and prototyped our app using Figma.
+                                    We designed and prototyped our app using Figma before official development. We tried to comply with the well known user acessibility standards.
                                 </p>
                                 
-                                <img style={{objectFit:'contain',width:'80%',height:'100%'}} src={figma_design}/>
+                                <img className={styles.img} style={{objectFit:'contain',height:'100%'}} src={figma_design}/>
                             </section>
                         </section>
                     </>
-                    :
-                    <LearnMoreSection person={person} setPerson={setPerson}/>
-                    }
+                    {/* // :
+                    // <LearnMoreSection person={person} setPerson={setPerson}/>
+                    // } */}
                 </main>
             <SiteFooter/>
         </div>
@@ -185,27 +185,16 @@ function Card({person=default_person,setPerson=()=>{}}:{person?:MemberData,setPe
 {
 
     return (
-        <div className="card" style={{border:'1px solid black',
-            borderRadius:10,
-            minWidth:200,
-            width:'30%',
-            display:'flex',
-            flexDirection:'column',
-            alignItems:'center',
-            backgroundColor:'white',
-            color:'black',
-            padding:'15px 20px',
-            gap:15
-        }}>
-            <h2 style={{textAlign:'center',textTransform:'capitalize',whiteSpace:'nowrap'}}>{person.name}</h2>
-            <div style={{height:300,width:'100%',border:'1px solid black', backgroundColor:'grey'}}>
-                <img style={{objectFit:'contain', width:'100%', height:'100%'}} src={person.image ?? (person.sex=="male"? male_icon : female_icon)}/>
+        <div className={styles.card}>
+            <h2 className={styles.name} style={{textAlign:'center',textTransform:'capitalize',whiteSpace:'nowrap'}}>{person.name}</h2>
+            <div style={{height:150,width:'100%',borderRadius:10,border:'1px solid black', backgroundColor:'grey',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
+                <img style={{objectFit:'contain', width:'100%', height:'80%'}} src={person.image ?? (person.sex=="male"? male_icon : female_icon)}/>
             </div>
-            <h4 style={{textTransform:'capitalize',height:78,display:'flex',flexDirection:'column',textAlign:'center',justifyContent:'center'}}>
+            <h4 className={styles.role} style={{textTransform:'capitalize',height:25,display:'flex',flexDirection:'column',textAlign:'center',justifyContent:'center'}}>
                 {person.role}
             </h4>
-            <p style={{height:100, width:'100%', textAlign:'center',textOverflow:'ellipsis',overflow:'hidden'}}>{person.short_description ?? person.description}</p>
-            <Link to="" onClick={()=>{setPerson(person)}}>Learn More</Link>
+            <p style={{height:100, width:'100%', textAlign:'center',textOverflow:'ellipsis',overflow:'hidden',margin:0}}>{person.short_description ?? person.description}</p>
+            {/* <Link to="" onClick={()=>{setPerson(person)}}>Learn More</Link> */}
         </div>
     );
 }

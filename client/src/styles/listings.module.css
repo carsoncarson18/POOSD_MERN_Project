@@ -57,7 +57,7 @@
 
 .listingcard {
   display: flex;
-  /* gap: 1em; */
+  gap: 1em;
   background: #f7f0e5;
   border: 2px solid #d4c9b7;
   border-radius: .7em;
@@ -72,14 +72,14 @@
   height: 140px;
   object-fit: cover;
   border-radius: 10px;
-  margin-right: 2em;
+  /* margin-right: 2em; */
   flex-shrink: 0;
 }
 
 /* DETAILS RIGHT */
 .listingdetails {
   flex: 1;
-  min-width: 150px;
+  min-width: 0px;
 }
 
 .listingdetails h2 {
@@ -126,7 +126,7 @@
   color: white;
   border: none;
   padding: 8px 14px;
-  margin-right: 8px;
+  /* margin-right: 8px; */
   border-radius: 8px;
   cursor: pointer;
 }
@@ -155,7 +155,7 @@ button:hover {
   .listingcard img {
     margin-bottom: 1em;
     width: 100%;
-    height: 50%;
+    height: auto;
   }
 
   .listingscontainer {
@@ -222,4 +222,21 @@ button:hover {
   background: #3a6b4a;
   color: white;
   border-color: #3a6b4a;
+}
+
+.btnclaim,
+.btnconfirm,
+.btncancel,
+.filterbtn,
+.buttons button {
+font-size: 0.9rem; 
+transition: opacity 0.2s;
+}
+.btnclaim:hover,
+.btnconfirm:hover,
+.btncancel:hover,
+.filterbtn:hover,
+.buttons button:hover {
+font-size: 0.9rem; 
+opacity: 0.7;
 }

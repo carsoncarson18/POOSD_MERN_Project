@@ -73,7 +73,7 @@
     gap: 60px;
     padding-bottom: 80px;
     width: 100%;
-    border: 1px solid white;
+    /* border: 1px solid white; */
 }
 
 .neighborhood, .createHoodPopup, .leaveHoodPopup  {

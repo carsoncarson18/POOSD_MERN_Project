@@ -90,7 +90,6 @@ const getAllHoodIngredients = async (req, res, next) => {
 const getAllUserHoods = async (req, res) => {
   try {
     const hoods = await Neighborhood.find({ members: req.user._id })
-  
     return res.json({ neighborhoods: hoods });
   } catch (err) {
     return res.status(500).json({ error: "Failed to fetch Users Neighborhoods", details: err.message })

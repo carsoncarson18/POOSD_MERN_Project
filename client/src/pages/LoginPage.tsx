@@ -1,3 +1,6 @@
+// AI-assisted: Implementation of login session management via localStorage, status-based UI 
+// feedback for account activation, and integrated navigation for the password recovery flow
+
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -36,12 +39,14 @@ export default function LoginPage() {
 
             // Save user id
             localStorage.setItem("user", JSON.stringify({ id: response.data.user_id }));
+            console.log(response.data.user_id);
+            
 
             // Setting global header for session
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             // Temporary success feedback, will change later
-            navigate("/listingpage");
+            navigate("/neighborhoods");
             console.log("Token:", response.data.token);
 
         } catch (err: any) {

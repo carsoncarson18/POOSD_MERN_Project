@@ -1,16 +1,25 @@
-const { z } = require('zod');
-
+const { z } = require("zod");
 
 // Unit options for quantity
-const validUnitsOptions = ["g", "kg", "ml", "L", "cup", "tbsp", "tsp", "piece", "lb", "count", "oz", " "];
+const validUnitsOptions = [
+  "g",
+  "kg",
+  "ml",
+  "L",
+  "cup",
+  "tbsp",
+  "tsp",
+  "piece",
+  "lb",
+  "count",
+  "oz",
+  " ",
+];
 const validUnits = z
   .string()
-  .refine(
-  (val) => val === undefined || validUnitsOptions.includes(val),
-  {
+  .refine((val) => val === undefined || validUnitsOptions.includes(val), {
     message: `Invalid unit: must be within [${validUnitsOptions.join(", ")}]`,
-  })
-
+  });
 
 // Category options
 const validCategory = [
@@ -29,15 +38,11 @@ const validCategory = [
   "spreads",
   "snacks",
   "other",
-]
+];
 
-const categorySchema = z.string()
-  .refine(
-    (val) => validCategory.includes(val),
-    {
-      message: `Invalid category: must be within [${validCategory.join(", ")}]`,
-    }
-  );
+const categorySchema = z.string().refine((val) => validCategory.includes(val), {
+  message: `Invalid category: must be within [${validCategory.join(", ")}]`,
+});
 
 // Create ingredient reqs
 const createIngredientSchema = z.object({
@@ -49,26 +54,26 @@ const createIngredientSchema = z.object({
     .trim(),
 
   // Ensure expiry date is in the future
-  expiresAt: z
-      .date()
-      .refine(
-        (date) => {
-          if (date === undefined) return true; // optional field
-          return date > new Date();
-        },
-        { message: "Expiration date must be in the future" },
-      ),
+  expiresAt: z.date().refine(
+    (date) => {
+      if (date === undefined) return true; // optional field
+      return date > new Date();
+    },
+    { message: "Expiration date must be in the future" },
+  ),
 
   neighborhood: z.string("Neighborhood ID must be passed"),
 
   // Ensure positive quantity and valid units
-  quantity: z.object({
-    value: z.coerce.number().positive("Quantity must be positive"),
-    unit: validUnits
-  })
-  .refine((val) => val !== undefined, {
-    message: "Quantity is required. Please provide an object with 'value' and 'unit' fields"
-  }),
+  quantity: z
+    .object({
+      value: z.coerce.number().positive("Quantity must be positive"),
+      unit: validUnits,
+    })
+    .refine((val) => val !== undefined, {
+      message:
+        "Quantity is required. Please provide an object with 'value' and 'unit' fields",
+    }),
 
   // Description has a 400 char limit
   description: z
@@ -104,11 +109,10 @@ const updateIngredientSchema = createIngredientSchema
   .omit({
     neighborhood: true,
   })
-  .partial()
-
+  .partial();
 
 // Export all schemas
-module.exports =  {
+module.exports = {
   createIngredientSchema,
   createIngredientClientSchema,
   updateIngredientSchema,

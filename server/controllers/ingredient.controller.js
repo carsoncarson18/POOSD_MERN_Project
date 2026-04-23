@@ -125,12 +125,9 @@ const editIngredient = async (req, res, next) => {
 
     //if not, exit
     if (!getIngredient) {
-      return res
-        .status(401)
-        .json({
-          message:
-            "Unauthorized; Only original poster can edit this ingredient",
-        });
+      return res.status(401).json({
+        message: "Unauthorized; Only original poster can edit this ingredient",
+      });
     } else {
       // Update ingredient
       const updateStat = await Ingredient.updateOne(
@@ -193,14 +190,12 @@ const deleteIngredient = async (req, res, next) => {
     console.log(findIngredient);
 
     if (!findIngredient)
-      return res
-        .status(401)
-        .json({
-          message:
-            "Ingredient doesn't exist, or you're not authorized to delete it.",
-        });
+      return res.status(401).json({
+        message:
+          "Ingredient doesn't exist, or you're not authorized to delete it.",
+      });
 
-    const deleteIngredient = await Ingredient.deleteOne({ findIngredient });
+    const deleteIngredient = await Ingredient.deleteOne({ _id: req.body._id });
     return res.json({
       message: "Successfully deleted ingredient!",
       deleteResult: deleteIngredient,
@@ -232,33 +227,34 @@ const claimIngredient = async (req, res, next) => {
 
     // If the ingredient was posted by the same user tryna claim it, give error
     if (getIngredient.claimed) {
-      return res
-        .status(400)
-        .json({
-          error: "This ingredient has already found a home and is no longer available",
-        });
+      return res.status(400).json({
+        error:
+          "This ingredient has already found a home and is no longer available",
+      });
     }
 
     // If the ingredient was posted by the same user tryna claim it, give error
     if (getIngredient.postedBy._id.equals(req.user._id)) {
-      return res
-        .status(400)
-        .json({
-          error: "You cannot claim an ingredient that is yours, silly!",
-        });
+      return res.status(400).json({
+        error: "You cannot claim an ingredient that is yours, silly!",
+      });
     }
 
     // Claim ingredient
-    const updateIngredient = await Ingredient.findByIdAndUpdate(ingredientId, {
-      claimed: true,
-      claimedBy: req.user._id,
-
-    },
-      { returnDocument: 'after' } // returns the doc after the update
-    )
-      .populate("claimedBy", "firstName email")
+    const updateIngredient = await Ingredient.findByIdAndUpdate(
+      ingredientId,
+      {
+        claimed: true,
+        claimedBy: req.user._id,
+      },
+      { returnDocument: "after" }, // returns the doc after the update
+    ).populate("claimedBy", "firstName email");
 
     // Send the claim email to the original poster
+    console.log("postedBy:", getIngredient.postedBy);
+    console.log("claimedBy:", updateIngredient.claimedBy);
+    console.log("neighborhood:", getIngredient.neighborhood);
+
     const sendAutoClaimEmail = await sendClaimEmail(
       getIngredient.postedBy,
       updateIngredient.claimedBy,
@@ -266,15 +262,14 @@ const claimIngredient = async (req, res, next) => {
       getIngredient.neighborhood,
     );
 
+    console.log("claim email result:", sendAutoClaimEmail);
+
     // If it failed, alert user
     if (!sendAutoClaimEmail?.statusCode) {
-      return res
-        .status(400)
-        .json({
-          error: "Failed to send email to original poster",
-        });
+      return res.status(400).json({
+        error: "Failed to send email to original poster",
+      });
     }
-
 
     // Success
     return res.json({

@@ -23,31 +23,29 @@ type Ingredient = {
   createdAt: string;
 };
 
-/*
 type Neighborhood = {
   _id: string;
   name: string;
   zipCode: string;
 };
-*/
 
 function ListingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
   // TEMP testing -  will delete when neighborhoods page is made
-  const neighborhood = location.state?.neighborhood ?? {
-    _id: "69d6ebf15199fe9f257fc531",
-    name: "Zainab-Hood",
-    zipCode: "12345",
-  };
+  // const neighborhood = location.state?.neighborhood ?? {
+  //   _id: "69d6ebf15199fe9f257fc531",
+  //   name: "Zainab-Hood",
+  //   zipCode: "12345",
+  // };
 
   // vvvv switch back to this line vvvv
-  // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
+  const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
 
   // const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
-  console.log("user object", user);
+  // console.log("user object", user);
 
   // main states
   const [listings, setListings] = useState<Ingredient[]>([]);
@@ -60,12 +58,17 @@ function ListingsPage() {
 
   const filteredListings =
     activeCategory === "all"
-      ? listings
-      : listings.filter((i) => i.category === activeCategory);
+      ? listings.filter((i) => i.postedBy !== user?.id) // only show items not posted by user
+      : activeCategory === "your items"
+        ? listings.filter((i) => i.postedBy === user?.id) // only show items the user posted
+        : listings.filter(
+            (i) => i.category === activeCategory && i.postedBy !== user?.id, // items in a specific category
+          );
 
   // gets categories that have items
   const availableCategories = [
     "all",
+    "your items",
     ...new Set(listings.map((i) => i.category)),
   ];
 
@@ -133,12 +136,12 @@ function ListingsPage() {
 
   const handleConfirm = async (index: number) => {
     try {
-      const item = listings[index];
+      const item = filteredListings[index];
       const token = localStorage.getItem("token");
       await axios.post(
         `${API_URL}/api/claimIngredient`,
         { _id: item._id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       /* // replaced with axios
@@ -168,7 +171,7 @@ function ListingsPage() {
       const token = localStorage.getItem("token");
       await axios.delete(`${API_URL}/api/deleteIngredient`, {
         data: { _id: id },
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       /* replaced with axios
@@ -199,23 +202,6 @@ function ListingsPage() {
       {/* <ListingsHeader /> */}
       <SiteHeader />
       <main className={styles.listingspage}>
-        <div className={styles.actions}>
-          {/* return to neighborhoods page */}
-          <button
-            className={styles.addlisting}
-            onClick={() => navigate("/neighborhoods")}
-          >
-            ← Neighborhoods
-          </button>
-          {/* add a scrap = */}
-          <button
-            className={styles.addlisting}
-            onClick={() => setShowModal(true)}
-          >
-            + Add Listing
-          </button>
-        </div>
-
         {/* list of posted scraps */}
         <div className={styles.listingscontainer}>
           {loading && (
@@ -229,6 +215,22 @@ function ListingsPage() {
               No scraps posted yet - be the first!
             </p>
           )}
+
+          <div className={styles.actions}>
+            <div className={styles.neighborhoodName}>
+              <h1>{neighborhood?.name}</h1>
+            </div>
+
+            <div className={styles.buttons}>
+              {/* return to neighborhoods page */}
+              <button onClick={() => navigate("/neighborhoods")}>
+                ← Neighborhoods
+              </button>
+
+              {/* add a scrap */}
+              <button onClick={() => setShowModal(true)}>+ Add Listing</button>
+            </div>
+          </div>
 
           {/* filter options */}
           <div className={styles.filterbar}>

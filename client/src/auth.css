@@ -136,7 +136,7 @@
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Creates consistent spacing between groups */
+    gap: 15px;
 }
 
 .input-group {

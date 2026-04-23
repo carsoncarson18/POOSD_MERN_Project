@@ -42,25 +42,30 @@ const signup = async (req, res) => {
     const isDupUsername = await User.findOne({ username: username });
     const isDupEmail = await User.findOne({ email: email });
 
-    if (isDupUsername) {
+    if (isDupEmail) {
+      if (!isDupEmail.isVerified) {
+        return res.status(400).json({
+          error: "Verification email already sent; please check your inbox",
+        });
+      } else {
+        return res.status(401).json({
+          error: "Email already taken; please choose another one",
+        });
+      }
+    } else if (isDupUsername) {
       return res.status(401).json({
         error: "Username already taken; please choose another one",
-      });
-    } else if (isDupEmail) {
-      return res.status(401).json({
-        error: "Email already taken; please choose another one",
       });
     } else {
       //hash with salt
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Set up new user for db, but don't add yet
-      const newUser = {
-        firstName,
-        username,
-        hashedPassword,
-        email,
-      };
+      const newUser = await User.create({
+        firstName: firstName,
+        username: username,
+        password: hashedPassword,
+        email: email,
+      });
 
       const token = jwt.sign(
         {
@@ -99,9 +104,6 @@ const signup = async (req, res) => {
           .json({ message: "Failed to do email verification :(" });
       }
 
-      // const retObj = newUser.toObject();
-      // delete retObj.password;
-
       // Return user data
       return res.json({
         message:
@@ -125,32 +127,47 @@ const activateEmail = async (req, res) => {
 
     const { firstName, username, password, email } = user;
     console.log(user);
-    // Check if user already exists (in case they click the link twice)
+
+    // Check if user already exists and is verified
     const existingUser = await User.findOne({ email: email });
 
-    if (existingUser) {
+    if (existingUser?.isVerified) {
       return res.status(400).json({ message: "Account already activated!" });
     }
 
+    if (existingUser) {
+      // User exists but not verified — mark as verified
+      const updated = await User.findByIdAndUpdate(
+        existingUser._id,
+        { isVerified: true },
+        { new: true }
+      );
+      return res.json({
+        message: "Account has been successfully activated! Please login!",
+        user: updated,
+      });
+    }
+
+    // User doesn't exist yet — create them
     const newUser = await User.create({
-      firstName: firstName,
-      username: username,
-      password: password,
-      email: email,
+      firstName,
+      username,
+      password,
+      email,
+      isVerified: true,
     });
 
     if (!newUser) {
       return res.status(400).json({ message: "Failed to create user" });
     }
+
     return res.json({
       message: "Account has been successfully activated! Please login!",
       user: newUser,
     });
   } catch (err) {
-    console.error("Error saving user data:", err); // fail
-    res
-      .status(500)
-      .json({ error: "Failed to save user", details: err.message });
+    console.error("Error saving user data:", err);
+    res.status(500).json({ error: "Failed to save user", details: err.message });
   }
 };
 
@@ -162,7 +179,7 @@ const login = async (req, res) => {
       const prettyError = z.flattenError(validateLogin.error);
       return res.status(400).json({
         message: "Validation failed",
-        errors: prettyError
+        errors: prettyError,
       });
     }
 
@@ -173,8 +190,39 @@ const login = async (req, res) => {
 
     // Check if user exists
     if (!user) {
-      return res.status(401).json({
+      return res.status(400).json({
         error: "Invalid login information; check your spelling",
+      });
+    }
+
+    if (!user.isVerified) {
+      const appUrl = getAppUrl();
+
+      if (!appUrl) {
+        return res.status(500).json({
+          error: "Frontend URL is not configured",
+        });
+      }
+
+      const token = jwt.sign(
+        {
+          userId: user._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" },
+      );
+
+      const url = `${appUrl}/activate/${token}`;
+      const verificationResult = await sendVerificationEmail(
+        user.email,
+        url,
+        "Verify your email address",
+        "Confirm Email",
+      );
+
+      return res.status(200).json({
+        details:
+          "Verify your email to complete your registration; resent verification email!",
       });
     }
 
@@ -202,7 +250,6 @@ const login = async (req, res) => {
 // Takes in email and sends email confirming password change request
 const resetPassword = async (req, res) => {
   try {
-
     // Validate email
     const { email } = req.body;
     const validateEmail = emailVerifySchema.safeParse(email);
@@ -221,12 +268,10 @@ const resetPassword = async (req, res) => {
 
     // If not, send vague error to protect privacy
     if (!isUser) {
-      return res
-        .status(200)
-        .json({
-          message:
-            "If an account exists, you will receive a password reset email",
-        });
+      return res.status(200).json({
+        message:
+          "If an account exists, you will receive a password reset email",
+      });
     }
 
     // make jwt token (expires in one hour)
@@ -256,7 +301,7 @@ const resetPassword = async (req, res) => {
       "Forgot Your Password for Scraps?",
       url,
       "Password Change Request",
-      "Reset Password"
+      "Reset Password",
     );
 
     // Failure to send email
@@ -270,13 +315,15 @@ const resetPassword = async (req, res) => {
 
     // Sucess
     return res.json({
-      message:
-        "If an account exists, you will receive a password reset email",
+      message: "If an account exists, you will receive a password reset email",
     }); // success
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to complete password reset", details: err.message });
+      .json({
+        error: "Failed to complete password reset",
+        details: err.message,
+      });
   }
 };
 
@@ -295,18 +342,19 @@ const activatePassword = async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Confirm password reset
-      if (decoded.purpose !== 'password-reset') {
+      if (decoded.purpose !== "password-reset") {
         return res.status(400).json({ error: "Invalid token purpose" });
       }
 
       // Ensure new password meets requirements
       const validatePassword = passwordValidator.safeParse(password);
       console.log(validatePassword.data);
+
       if (!validatePassword.success) {
         const prettyError = z.flattenError(validatePassword.error);
         return res.status(400).json({
           message: "Password validation failed",
-          errors: prettyError
+          errors: prettyError,
         });
       }
 
@@ -327,12 +375,10 @@ const activatePassword = async (req, res) => {
         message: "Password has successfully been reset!",
       }); // success!
     } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: "Failed to update password in database",
-          details: err.message,
-        }); // failure (database side)
+      res.status(500).json({
+        error: "Failed to update password in database",
+        details: err.message,
+      }); // failure (database side)
     }
   } catch (err) {
     console.error("Token error:", err); // failure (token)
@@ -342,4 +388,10 @@ const activatePassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, activateEmail, resetPassword, activatePassword };
+module.exports = {
+  signup,
+  login,
+  activateEmail,
+  resetPassword,
+  activatePassword,
+};

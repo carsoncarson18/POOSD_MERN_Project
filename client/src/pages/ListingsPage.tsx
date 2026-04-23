@@ -23,32 +23,29 @@ type Ingredient = {
   createdAt: string;
 };
 
-/*
 type Neighborhood = {
   _id: string;
   name: string;
   zipCode: string;
 };
-*/
 
 function ListingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
   // TEMP testing -  will delete when neighborhoods page is made
-  const neighborhood = location.state?.neighborhood ?? {
-    _id: "69d6ebf15199fe9f257fc531",
-    name: "Zainab-Hood",
-    zipCode: "12345",
-  };
+  // const neighborhood = location.state?.neighborhood ?? {
+  //   _id: "69d6ebf15199fe9f257fc531",
+  //   name: "Zainab-Hood",
+  //   zipCode: "12345",
+  // };
 
   // vvvv switch back to this line vvvv
-  // const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
+  const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
 
   // const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "null");
   // console.log("user object", user);
-
 
   // main states
   const [listings, setListings] = useState<Ingredient[]>([]);
@@ -144,7 +141,7 @@ function ListingsPage() {
       await axios.post(
         `${API_URL}/api/claimIngredient`,
         { _id: item._id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       /* // replaced with axios
@@ -174,7 +171,7 @@ function ListingsPage() {
       const token = localStorage.getItem("token");
       await axios.delete(`${API_URL}/api/deleteIngredient`, {
         data: { _id: id },
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       /* replaced with axios

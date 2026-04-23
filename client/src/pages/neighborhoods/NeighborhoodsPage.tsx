@@ -33,6 +33,31 @@ export default function NeighborHoodsPage() {
     const formRef = useRef<HTMLFormElement | null>(null);
 
     async function joinNeighborhood() {
+        let exists = false;
+
+        const neighborhoodCount = neighborhoods?.length ?? 0;
+ 
+        for (let i = 0; i < neighborhoodCount; i++) {
+            if (!neighborhoods) {break;}
+            const hood :Hood = neighborhoods[i];                
+            
+            if (hood && hood.zipCode===search)
+            {
+                exists = true;
+                break;
+            }
+        }
+
+        if (exists)
+        {
+            setError('You are already in this neighborhood.');
+        }
+        else {
+            setError('');
+        }
+
+
+
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/joinHood`, {
@@ -54,14 +79,16 @@ export default function NeighborHoodsPage() {
             const json = await res.json();
             const status = json.status;
             setJoinStatus(status);
+
+            // if (status == 'new')
             
 
-            if (status == "joined" && search) {
-                setError("You are already in this neighborhood.");
-            }
-            else {
-                setError("");
-            }
+            // if (status == "joined" && search) {
+            //     setError("You are already in this neighborhood.");
+            // }
+            // else {
+            //     setError("");
+            // }
 
 
 

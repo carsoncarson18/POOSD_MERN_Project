@@ -1,6 +1,6 @@
 import SiteFooter from "../components/SiteFooter/SiteFooter";
 import SiteHeader from "../components/SiteHeader/SiteHeader";
-import hero_image from "../assets/landing-page/food-waste-bg.png"
+import hero_image from "../assets/landing-page/food-waste-bg.webp"
 
 export default function LandingPage() {
 

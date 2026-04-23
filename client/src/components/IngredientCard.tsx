@@ -68,11 +68,8 @@ export default function IngredientCard({
         <div className={styles.buttongroup}>
           {/* if the user is the owner of the listing, the button option is to delete it */}
           {isOwner ? (
-            <div>
-              <button
-                className={styles.btnconfirm}
-                onClick={() => onEdit(item)}
-              >
+            <>
+              <button className={styles.btnclaim} onClick={() => onEdit(item)}>
                 Edit
               </button>
               <button
@@ -81,7 +78,7 @@ export default function IngredientCard({
               >
                 Remove
               </button>
-            </div>
+            </>
           ) : confirmIndex === index ? (
             <>
               <button

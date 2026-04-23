@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-// import ListingsHeader from "../components/ListingHeader";
 import axios from "axios";
 import styles from "../styles/listings.module.css";
 import SiteFooter from "../components/SiteFooter/SiteFooter";
@@ -32,13 +31,6 @@ type Neighborhood = {
 function ListingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // TEMP testing -  will delete when neighborhoods page is made
-  // const neighborhood = location.state?.neighborhood ?? {
-  //   _id: "69d6ebf15199fe9f257fc531",
-  //   name: "Zainab-Hood",
-  //   zipCode: "12345",
-  // };
 
   // vvvv switch back to this line vvvv
   const neighborhood: Neighborhood | undefined = location.state?.neighborhood;
@@ -102,20 +94,6 @@ function ListingsPage() {
         // { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      /*
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to Load listings");
-
-      setListings(
-        json.ingredients
-          .filter((i: Ingredient) => !i.claimed)
-          .sort(
-            (a: Ingredient, b: Ingredient) =>
-              new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime(),
-          ),
-      );
-      */
-
       // sort listings by expiration date
       setListings(
         res.data.ingredients
@@ -139,23 +117,12 @@ function ListingsPage() {
     try {
       const item = filteredListings[index];
       const token = localStorage.getItem("token");
+      console.log("token:", token);
       await axios.post(
         `${API_URL}/api/claimIngredient`,
         { _id: item._id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-
-      /* // replaced with axios
-      const res = await fetch(`${API_URL}/api/claimIngredient`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ _id: item._id }),
-      });
-      if (!res.ok) throw new Error("Failed to claim");
-      */
 
       // remove from listing and display confirmation
       setListings((prev) => prev.filter((_, i) => i !== index));
@@ -170,44 +137,13 @@ function ListingsPage() {
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
+      console.log("token:", token);
       await axios.delete(`${API_URL}/api/deleteIngredient`, {
         data: { _id: id },
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      /* replaced with axios
-      const res = await fetch(`${API_URL}/api/deleteIngredient`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ _id: id }),
-      });
-      if (!res.ok) throw new Error("Failed to delete");
-      */
-
       setListings((prev) => prev.filter((i) => i._id !== id));
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  //
-  const handleEdit = async (id: string, updatedFields: Partial<Ingredient>) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${API_URL}/api/editIngredient`,
-        { _id: id, ...updatedFields },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      setListings((prev) =>
-        prev.map((item) =>
-          item._id === id ? { ...item, ...updatedFields } : item,
-        ),
-      );
     } catch (err: any) {
       alert(err.message);
     }
@@ -300,10 +236,8 @@ function ListingsPage() {
             neighborhoodId={neighborhood!._id}
             token={null}
             existingIngredient={editingItem}
-            onCreated={(updated) => {
-              setListings((prev) =>
-                prev.map((i) => (i._id === updated._id ? updated : i)),
-              );
+            onCreated={() => {
+              fetchListings();
               setEditingItem(null);
             }}
             onClose={() => setEditingItem(null)}

@@ -49,6 +49,7 @@ type Props = {
     quantity: { value: number; unit: string };
     expiresAt: string;
     category: string;
+    imageUrl: string;
   };
 };
 
@@ -82,15 +83,18 @@ const INITIAL_FORM = (existing?: Props["existingIngredient"]): FormState =>
       }
     : EMPTY_FORM;
 
-export default function ({
+export default function AddIngredientModal({
   neighborhoodId,
   onCreated,
   onClose,
   existingIngredient,
 }: Props) {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM(existingIngredient));
   const isEditing = !!existingIngredient;
+  const [form, setForm] = useState<FormState>(INITIAL_FORM(existingIngredient));
   const [image, setImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    existingIngredient?.imageUrl ?? null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -117,34 +121,38 @@ export default function ({
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      console.log("editing token:", token);
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("description", form.description);
+      formData.append("expiresAt", form.expiresAt);
+      formData.append("category", form.category);
+      formData.append("quantity[value]", String(qtyNum));
+      formData.append("quantity[unit]", form.quantity_unit);
 
       if (isEditing) {
-        const res = await axios.post(
-          `${API_URL}/api/editIngredient`,
-          {
-            _id: existingIngredient!._id,
-            name: form.name,
-            description: form.description,
-            expiresAt: form.expiresAt,
-            category: form.category,
-            quantity: { value: qtyNum, unit: form.quantity_unit },
-          },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        onCreated(res.data.ingredient);
-      } else {
-        const formData = new FormData();
-        formData.append("name", form.name);
-        formData.append("description", form.description);
-        formData.append("expiresAt", form.expiresAt);
-        formData.append("category", form.category);
-        formData.append("neighborhood", neighborhoodId);
-        formData.append("quantity[value]", String(qtyNum));
-        formData.append("quantity[unit]", form.quantity_unit);
+        formData.append("_id", existingIngredient!._id);
+        console.log("_id being sent:", formData.get("_id"));
 
-        if (image) {
-          formData.append("image", image);
+        if (image) formData.append("image", image);
+        console.log("editing id:", existingIngredient!._id);
+        console.log("formData _id:", formData.get("_id"));
+
+        console.log("FormData entries:");
+        for (const [key, value] of formData.entries()) {
+          console.log(key, value);
         }
+
+        await axios.post(`${API_URL}/api/editIngredient`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        formData.append("neighborhood", neighborhoodId);
+        if (image) formData.append("image", image);
 
         const res = await axios.post(
           `${API_URL}/api/createIngredient`,
@@ -152,13 +160,18 @@ export default function ({
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
+              // "Content-Type": "multipart/form-data",
             },
           },
         );
         onCreated(res.data.ingredient);
+        setForm(EMPTY_FORM);
+        setImage(null);
+        onClose();
+        return;
       }
 
+      onCreated(null);
       setForm(EMPTY_FORM);
       setImage(null);
       onClose();
@@ -280,11 +293,29 @@ export default function ({
 
           <label className={styles.label}>
             Photo (optional)
+            {previewUrl && (
+              <img
+                src={previewUrl}
+                alt="Current Image"
+                style={{
+                  width: "140px",
+                  maxHeight: "auto",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                  marginBottom: "6px",
+                }}
+              />
+            )}
             <input
               className={styles.input}
               type="file"
               accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              // onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setImage(file);
+                if (file) setPreviewUrl(URL.createObjectURL(file));
+              }}
             />
           </label>
 

@@ -33,6 +33,31 @@ export default function NeighborHoodsPage() {
     const formRef = useRef<HTMLFormElement | null>(null);
 
     async function joinNeighborhood() {
+        let exists = false;
+
+        const neighborhoodCount = neighborhoods?.length ?? 0;
+ 
+        for (let i = 0; i < neighborhoodCount; i++) {
+            if (!neighborhoods) {break;}
+            const hood :Hood = neighborhoods[i];                
+            
+            if (hood && hood.zipCode===search)
+            {
+                exists = true;
+                break;
+            }
+        }
+
+        if (exists)
+        {
+            setError('You are already in this neighborhood.');
+        }
+        else {
+            setError('');
+        }
+
+
+
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/joinHood`, {
@@ -55,12 +80,15 @@ export default function NeighborHoodsPage() {
             const status = json.status;
             setJoinStatus(status);
 
-            if (status == "joined") {
-                setError("You are already in this neighborhood.");
-            }
-            else {
-                setError("");
-            }
+            // if (status == 'new')
+            
+
+            // if (status == "joined" && search) {
+            //     setError("You are already in this neighborhood.");
+            // }
+            // else {
+            //     setError("");
+            // }
 
 
 
@@ -84,6 +112,10 @@ export default function NeighborHoodsPage() {
 
             const json = await res.json();
             const hoods = json.neighborhoods;
+            if (Array.isArray(hoods))
+            {
+                hoods.reverse();
+            }
 
             if (!res.ok) throw new Error(json.error || "Failed to Load Neighborhoods");
 
@@ -188,12 +220,6 @@ export default function NeighborHoodsPage() {
 
     }, [joinStatus]);
 
-
-    useEffect(() => {
-        fetchNeighborhoods();
-    }, []);
-
-
     return (
         <>
             <SiteHeader />
@@ -250,9 +276,9 @@ const Neighborhood = ({ hood, onEnter = () => { }, setHoodLeaving }: { hood: Hoo
         <div className={styles.neighborhood}>
             <p>{hood.name}</p>
             <p>Zip Code: {hood.zipCode}</p>
-            <button onClick={() => { onEnter(hood) }}>Enter</button>
+            <button className={styles.button} onClick={()=>{onEnter(hood)}}>Enter</button>
             {
-                <button onClick={() => { setHoodLeaving(hood) }}>Leave Neighborhood</button>
+                <button className={styles.leaveHoodButton} onClick={()=>{setHoodLeaving(hood)}}>Leave Neighborhood</button>
             }
         </div>
     );

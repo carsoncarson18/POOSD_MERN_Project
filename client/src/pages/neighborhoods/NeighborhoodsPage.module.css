@@ -33,9 +33,11 @@
     border-radius: 20px;
     border: 1px solid black;
     color: black;
+    background-color: #ccc;
 
     &:hover {
-
+        padding: 5px 20px;
+        font-size: 1.3rem;
     }
 }
 
@@ -70,6 +72,8 @@
     align-items: center;
     gap: 60px;
     padding-bottom: 80px;
+    width: 100%;
+    /* border: 1px solid white; */
 }
 
 .neighborhood, .createHoodPopup, .leaveHoodPopup  {
@@ -85,12 +89,12 @@
     align-items: center;
     justify-content: center;
     color: var(--main-color);
-    padding: 60px auto;
+    padding: 70px auto;
 
     p {
         font-weight: 500;
         font-size: 1.5rem;
-        margin: 0;
+        margin: 0 10px;
     }
 
     p:first-of-type {
@@ -106,6 +110,12 @@
         font-size: 1.3rem;
         display: block;
         margin: 0 auto;
+        border: 1px solid black;
+        background-color: #576958;
+    }
+
+    .leaveHoodButton {
+        background-color: #b95753;
     }
 }
 
@@ -135,12 +145,14 @@
         border-radius: 10px;
         text-align: center;
     }
+
+    
 }
 
 .leaveHoodPopupContainer {
     z-index: 1;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: flex;
     position: fixed;
     flex-direction: column;
@@ -194,10 +206,14 @@
 }
 
 
-@media (max-height: 800px)
+@media (max-width: 800px)
 {
+    
+
     .neighborhood {
-        width: 80%;
+        width: 90%;
+        font-size: 12px;
+        padding: 25px 0;
     }
 
     .createHoodPopup {
@@ -205,6 +221,6 @@
     }
 
     .leaveHoodPopup {
-        width: 80%;
+        width: 90%;
     }
 }

@@ -1,6 +1,5 @@
-# Etelligenz WebView App
+#  WebView App
 
-A modern, streamlined Flutter application designed to wrap the [Etelligenz](https://saveyourscraps.xyz/) dynamic web platform into a native mobile interface.
 
 ## 📱 Features & Highlights
 
@@ -12,7 +11,7 @@ A modern, streamlined Flutter application designed to wrap the [Etelligenz](http
 
 ## 🏗 System Architecture
 
-The application is architected around a stateless top-level root (`EtelligenzApp`) defining the `MaterialApp` theme config and dispatching to a single-page stateful router (`_WebViewPageState`).
+The application is architected around a stateless top-level root (`ScrapsApp`) defining the `MaterialApp` theme config and dispatching to a single-page stateful router (`_WebViewPageState`).
 
 ```mermaid
 graph TD
@@ -20,7 +19,7 @@ graph TD
     classDef state fill:#00B4D8,stroke:#0077B6,stroke-width:2px,color:white;
     classDef action fill:#90e0ef,stroke:#0077B6,stroke-width:1px,color:black,stroke-dasharray: 4;
 
-    A[EtelligenzApp]:::flutter --> B(_WebViewPageState):::state
+    A[ScrapsApp]:::flutter --> B(_WebViewPageState):::state
     
     B --> C{Flutter Stack}:::flutter
     C -->|Background| D[WebViewWidget]:::flutter
@@ -47,7 +46,7 @@ Additionally, a concurrent `Future.delayed` 4-Second Timer runs synchronously ag
 ## 🛠 Project Structure
 
 ```text
-com_etelligenz_flutter/
+com_Scraps_flutter/
 ├── android/                   # Native Android wrapper and Gradle scripts
 ├── assets/                    # Static UI elements
 │   ├── logo.gif               # Animated primary splash branding
@@ -55,7 +54,7 @@ com_etelligenz_flutter/
 ├── lib/                       # The primary Dart application code
 │   └── main.dart              # Core routing, Splash State, and WebView configs
 ├── test/                      # Unit testing framework
-│   └── widget_test.dart       # Smoke tests validating the Etelligenz widget tree
+│   └── widget_test.dart       # Smoke tests validating the Scraps widget tree
 ├── WSL_FLUTTER_SETUP.md       # Development environment guidelines
 └── pubspec.yaml               # Dart dependencies and assets definition
 ```
@@ -87,7 +86,7 @@ If you are developing this on Windows 11 with the WSL2 integration, strict envir
 
 ## 🌍 Publication Guide: Next Steps for 100% Success
 
-Follow this comprehensive standard operating procedure to successfully publish the Etelligenz application to the Google Play Store and Apple App Store.
+Follow this comprehensive standard operating procedure to successfully publish the Scraps application to the Google Play Store and Apple App Store.
 
 ### 🤖 Google Play Store (Android)
 
@@ -130,7 +129,7 @@ Your final binary will be generated at `build/app/outputs/bundle/release/app-rel
 
 **1. Create Apple Developer Certificates**
 1. Apply and pay for the Apple Developer Program ($99/year).
-2. Through the web portal, register a unique **App ID** (e.g., `com.etelligenz`).
+2. Through the web portal, register a unique **App ID** (e.g., `com.Scraps`).
 3. Generate an iOS Distribution Certificate and a Provisioning Profile mapped to your App ID.
 
 **2. Configure Xcode Metadata**
@@ -154,4 +153,4 @@ This cleanly compiles the Swift/Objective-C frameworks and bundles the Dart AOT 
 6. Select the Build you pushed from Xcode Organizer and click **Submit for Review**. Wait 24–48 hours for Apple's success confirmation.
 
 ---
-*Maintained by the Etelligenz Development Team.*
+*Maintained by the Scraps Development Team.*
